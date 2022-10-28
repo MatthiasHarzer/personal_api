@@ -1,0 +1,19 @@
+{% extends "management/base.html" %}
+{% load static %}
+{% block content %}
+
+    {% if edit %}
+        <h1 class="header">{{ item_key }}</h1>
+        <form action="/manage/store/edit/{{ item_key }}/" method="POST">
+    {% else %}
+        <h1 class="header">New Store Item</h1>
+        <form action="/manage/store/new" method="POST">
+    {% endif %}
+
+{{ form.as_ul }}
+{% csrf_token %}
+<br>
+
+<input type="submit" value="Submit">
+</form>
+{% endblock %}

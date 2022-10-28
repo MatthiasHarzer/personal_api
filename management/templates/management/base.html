@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Key Manager</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@100;300&display=swap" rel="stylesheet">
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static "management/style.css" %}"/>
+
+</head>
+
+<body>
+<div class="topnav" id="nav">
+
+    <a class="school-name item" title="Api Manager">Api Manager</a>
+
+
+    <a class="item" href="/manage/create-new-permission" id="permission">New Permission</a>
+    <a class="item" href="/manage/keys/new" id="new">New Key</a>
+    <a class="item" href="/manage/store/new" id="store_new">New Store
+        Item</a>
+    <a class="item" href="/manage/overview" id="all">Overview</a>
+
+
+</div>
+
+<div id="content" class="content">
+    {% block content %}
+    {% endblock %}
+</div>
+</body>
+<script>
+    for (const child of document.getElementById('nav').children) {
+
+        if (child.id.length > 0 && child.id === "{{ site }}") {
+            child.classList.add('active')
+            break;
+        }
+    }
+
+    for (const inp of document.getElementsByTagName("input")) {
+        inp.placeholder = "Type something..."
+    }
+</script>
+</html>

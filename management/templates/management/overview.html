@@ -1,0 +1,139 @@
+{% extends "management/base.html" %}
+{% load static %}
+{% block content %}
+    <h1 class="header">Available Keys</h1>
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Key</th>
+            <th>Permission</th>
+            <th>Action</th>
+        </tr>
+        {% for key in keys %}
+            <tr>
+                <td>{{ key.name }}</td>
+                <td class="key confidential">{{ key.value }}</td>
+                <td>{{ key.permission }}</td>
+                <td>
+                    <div class="action">
+                        <a href="/manage/keys/edit/{{ key.value }}">Edit</a>
+                        <form action="/manage/keys/delete/{{ key.value }}/" method="POST">
+                            {% csrf_token %}
+                            <a href="#" class="del">
+                                <span class="del_txt">Delete</span>
+                                <input hidden
+                                       class="conf_del"
+                                       type="submit"
+                                       value="Confirm delete"></a>
+
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    <h1 class="header">Available Permissions</h1>
+    <ul>
+        {% for permision in all_permission %}
+            <li>{{ permision }}</li>
+        {% endfor %}
+    </ul>
+
+    <h1 class="header">Available Store Items</h1>
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Value</th>
+            <th>Action</th>
+        </tr>
+        {% for store_item in store_items %}
+            <tr>
+                <td>{{ store_item.name }}</td>
+                <td class="key {% if store_item.confidential %}confidential{% endif %}">
+                    {{ store_item.value }}</td>
+                <td>
+                    <div class="action">
+                        <a href="/manage/store/edit/{{ store_item.name }}">Edit</a>
+                        <form action="/manage/store/delete/{{ store_item.name }}/" method="POST">
+                            {% csrf_token %}
+                            <a href="#" class="del">
+                                <span class="del_txt">Delete</span>
+                                <input hidden
+                                       class="conf_del"
+                                       type="submit"
+                                       value="Confirm delete"></a>
+
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    <style>
+
+        table {
+            position: relative;
+            width: 90% !important;
+            overflow: hidden;
+        }
+
+        tr {
+            width: 100%;
+        {#display: flex;#}{#flex-flow: row;#}
+        }
+
+        table td, table th {
+            outline: black 1px solid;
+            padding: 4px 10px;
+
+            max-width: 0;
+            overflow-wrap: break-word;
+        }
+
+        table td.key {
+            width: 50%;
+
+        {#overflow: hidden;#}{#text-overflow: ellipsis;#}{#white-space: nowrap;#}
+        }
+
+        .confidential {
+            background-color: rgba(0, 0, 0, 0.05);
+            color: transparent;
+            transition: all 0.2s ease-in-out;
+
+            transition-delay: 0s;
+        }
+
+        .confidential:hover {
+            background-color: transparent;
+            color: inherit;
+            transition-delay: 0.5s;
+        }
+
+        .action {
+            display: flex;
+
+        {#flex-flow: row;#}
+        }
+
+        .action > * {
+            margin: 0 5px;
+        }
+    </style>
+    <script>
+        const dels = document.getElementsByClassName("del");
+        console.log(dels)
+
+        for (let elmt of dels) {
+            elmt.onclick = () => {
+                console.log("CLICK", elmt)
+                const txt = elmt.getElementsByClassName("del_txt")[0];
+                const input = elmt.getElementsByClassName("conf_del")[0];
+                txt.hidden = true;
+                input.hidden = false;
+            }
+        }
+    </script>
+
+{% endblock %}

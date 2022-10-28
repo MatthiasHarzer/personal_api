@@ -1,0 +1,8 @@
+/api/services/firebase-service-account.json
+/api/services/google-cloud-service-account.json
+/api/util/firebase-service-account-key.json
+/api/secrets.py
+*/migrations
+/venv
+*.log
+*.sqlite3

@@ -1,0 +1,33 @@
+{% extends "management/base.html" %}
+{% load static %}
+{% block content %}
+    {% if key %}
+        <h1 class="header">{{ key }}</h1>
+    {% else %}
+        <h1 class="header">New Key</h1>
+    {% endif %}
+    {% if edit %}
+        <form action="/manage/keys/edit/{{ key }}/" method="POST">
+    {% else %}
+        <form action="/manage/keys/new" method="POST">
+    {% endif %}
+{{ form.as_ul }}
+{% csrf_token %}
+<br>
+<br>
+<input type="submit" value="Submit">
+</form>
+
+
+<style>
+    form {
+        display: flex;
+        flex-flow: column;
+    }
+
+    form > label {
+        margin-top: 10px;
+    }
+
+</style>
+{% endblock %}

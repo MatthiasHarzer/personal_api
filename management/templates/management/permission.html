@@ -1,0 +1,10 @@
+{% extends "management/base.html" %}
+{% load static %}
+{% block content %}
+    <form action="/manage/create-new-permission" method="POST">
+        {{ form.as_ul }}
+        {% csrf_token %}
+        <input type="submit" value="Submit">
+    </form>
+
+{% endblock %}
