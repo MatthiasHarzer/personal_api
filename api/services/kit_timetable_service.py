@@ -66,21 +66,26 @@ class Timetable:
         }
 
 
-def get_file(url, file_type: str = "ics") -> str:
+def get_timetable_file(url, file_type: str = "ics") -> str:
     """Downloads a file from the given url and saves it to the given file path."""
     id_ = url.split("/")[-1]
-    file_path = f"cache/{id_}.{file_type}"
+
+    if not os.path.isdir("cache/timetable"):
+        os.mkdir("cache/timetable")
+
+    file_path = f"./cache/timetable/{id_}.{file_type}"
     if os.path.isfile(file_path) and time.time() - os.path.getmtime(file_path) < FILE_MAX_AGE:
         return file_path
 
     urllib.request.urlretrieve(url, file_path)
+
     return file_path
 
 
 def get_timetable(url: str = None) -> Timetable:
     """Returns the current timetable."""
     url = url or secrets.KIT_TIMETABLE_WEBCAL_URL
-    with open(get_file(url, "ics"), "r") as f:
+    with open(get_timetable_file(url, "ics"), "r") as f:
         cal: Calendar = Calendar.from_ical(f.read())
 
         events: list[Event] = []
