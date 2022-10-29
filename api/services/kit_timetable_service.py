@@ -8,6 +8,7 @@ from typing import Optional
 from icalendar import Calendar
 
 from api import secrets
+from personal_api import settings
 
 FILE_MAX_AGE = 60 * 60 * 24  # 1 days
 CLASS_TIMES = [
@@ -23,6 +24,9 @@ CLASS_TIMES = [
     (datetime.time(17, 15), datetime.time(17, 30), True, 1 / 6),
     (datetime.time(17, 30), datetime.time(19, 0), False, 1),
 ]
+
+BASE_DIR = settings.BASE_DIR
+CACHE_DIR = os.path.join(BASE_DIR, "cache", "timetable")
 
 
 @dataclass
@@ -66,21 +70,26 @@ class Timetable:
         }
 
 
-def get_file(url, file_type: str = "ics") -> str:
+def get_timetable_file(url, file_type: str = "ics") -> str:
     """Downloads a file from the given url and saves it to the given file path."""
     id_ = url.split("/")[-1]
-    file_path = f"cache/{id_}.{file_type}"
+
+    if not os.path.exists(CACHE_DIR):
+        os.mkdir(CACHE_DIR)
+
+    file_path = f"{CACHE_DIR}/{id_}.{file_type}"
     if os.path.isfile(file_path) and time.time() - os.path.getmtime(file_path) < FILE_MAX_AGE:
         return file_path
 
     urllib.request.urlretrieve(url, file_path)
+
     return file_path
 
 
 def get_timetable(url: str = None) -> Timetable:
     """Returns the current timetable."""
     url = url or secrets.KIT_TIMETABLE_WEBCAL_URL
-    with open(get_file(url, "ics"), "r") as f:
+    with open(get_timetable_file(url, "ics"), "r") as f:
         cal: Calendar = Calendar.from_ical(f.read())
 
         events: list[Event] = []

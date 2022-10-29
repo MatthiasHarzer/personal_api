@@ -106,7 +106,6 @@ def get_untis_timetable(request, key, webview="False", day=None, timeformat=None
 
 
 @requires(permission="kit")
-@optional(("webview", tc.str_to_bool))
 def get_kit_timetable(request):
     """Returns the timetable for the current day"""
 
