@@ -105,7 +105,16 @@ def get_untis_timetable(request, key, webview="False", day=None, timeformat=None
 def restart_discord_bot_service(request):
     try:
         requests.post("http://127.0.0.1:777/exec-as-root", json={"command": ["systemctl", "restart", "discord-bot"]})
-        return JsonResponse({"message": "success"})
+        return utils.success()
+    except Exception as e:
+        return JsonResponse({"message": "failed", "details": e})
+
+
+@requires(permission="api")
+def restart_self(request):
+    try:
+        requests.post("http://127.0.0.1:777/exec-as-root", json={"command": ["systemctl", "restart", "api"]})
+        return utils.success()
     except Exception as e:
         return JsonResponse({"message": "failed", "details": e})
 
