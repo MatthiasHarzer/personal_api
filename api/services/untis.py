@@ -4,7 +4,7 @@ from typing import Any, Optional
 
 import webuntis
 
-from api.util import db_utils, converter
+from api.util import db_utils, tc
 from api.util.utils import to_formatted_date, to_formatted_time, str_to_date
 
 start_times = ["07:45:00", "09:15:00", "09:30:00", "11:00:00", "11:20:00", "12:50:00", "13:30:00", "15:00:00"]
@@ -258,7 +258,7 @@ class Untis(object):
             useragent='WebUntis Test'
         ).login()
 
-        store_holidays = db_utils.get_store_item("untis_holidays", converter.str_to_dict)
+        store_holidays = db_utils.get_store_item("untis_holidays", tc.str_to_dict)
 
         holidays: list[dict] = []
 

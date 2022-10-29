@@ -1,5 +1,6 @@
 import datetime
 import time
+import traceback
 
 import requests
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
@@ -7,9 +8,10 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
 from api import secrets
+from api.services import kit_timetable_service
 from api.services.steammarketcrawler import SteamMarketCrawler
 from api.services.untis import Untis
-from api.util import db_utils, utils
+from api.util import db_utils, utils, tc
 from api.util.decorators import requires, optional
 from api.util.telegram_bot import send_telegram_message
 from api.util.utils import to_formatted_time, to_formatted_date, error
@@ -55,6 +57,7 @@ def get_untis_timetable(request, key, webview="False", day=None, timeformat=None
         datetime_now_formatted = f'{to_formatted_time(n)} {to_formatted_date(n)}'
 
         custom_day = not not day
+
         # * Try to parse the date from the query string
         try:
             if day is not None:
@@ -80,8 +83,7 @@ def get_untis_timetable(request, key, webview="False", day=None, timeformat=None
             return HttpResponseRedirect(f"/untis/timetable?key={key}&webview=True")
 
         # * Get the timetable from the untis apiwrapper
-        timetable_week = untis.get_timetable(day)
-
+        timetable_week = untis.get_timetable(monday)
         context = {
             "timetable": timetable_week,
             "api_key": key,
@@ -98,7 +100,18 @@ def get_untis_timetable(request, key, webview="False", day=None, timeformat=None
         else:
             return JsonResponse(context)
     except Exception as e:
+        # print(traceback.format_exc())
         return error(500, str(e))
+
+
+@requires(permission="kit")
+@optional(("webview", tc.str_to_bool))
+def get_kit_timetable(request):
+    """Returns the timetable for the current day"""
+
+    timetable: kit_timetable_service.Timetable = kit_timetable_service.get_timetable()
+
+    return JsonResponse(timetable.as_json())
 
 
 @requires(permission="discord-bot")

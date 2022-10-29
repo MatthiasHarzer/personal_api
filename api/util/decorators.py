@@ -4,7 +4,10 @@ Decorator for required permission and/or params for view (query_params returned 
 from typing import Union
 
 from api.models import ApiKey, Permission
+from api.util import tc
 from api.util.utils import error
+
+TypedParam = tuple[str, tc.TypeConverter]
 
 
 def requires(permission: Union[list[str], str] = None, query_params: Union[list[str], str] = None):
@@ -65,11 +68,18 @@ def requires(permission: Union[list[str], str] = None, query_params: Union[list[
     return decorator
 
 
-def optional(query_params: Union[list[str], str], prefix: str = "", suffix: str = ""):
+def optional(query_params: Union[list[Union[str, TypedParam]], str, TypedParam], prefix: str = "", suffix: str = ""):
     """Optional query_params for the view. If the param is found, it will be returned as kwarg with prefix/suffix"""
 
     # * Query params as set
     query_params: set = set(query_params if type(query_params) == list else [query_params])
+
+    query_params_with_type: set[tuple[str, tc.TypeConverter]] = set()
+    for param in query_params:
+        if type(param) == tuple:
+            query_params_with_type.add(param)
+        else:
+            query_params_with_type.add((param, str))
 
     def decorator(func):
         def wrapper(*args, **kwargs):
@@ -80,9 +90,10 @@ def optional(query_params: Union[list[str], str], prefix: str = "", suffix: str 
             request_params = request.GET
 
             # * Check URL-params for query_params
-            for param in query_params:
+            for param, _type in query_params_with_type:
                 # * Get the param from the URL-params or None and set kwarg (can be None, cause optional)
-                kwargs[f"{prefix}{param}{suffix}"] = request_params.get(param, None)
+                value = request_params.get(param, None)
+                kwargs[f"{prefix}{param}{suffix}"] = value if value is None else _type(value)
 
             # * Call the function with modified kwargs
             return func(*args, **kwargs)
@@ -90,5 +101,3 @@ def optional(query_params: Union[list[str], str], prefix: str = "", suffix: str 
         return wrapper
 
     return decorator
-
-

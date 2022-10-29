@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Timetable</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet">
+
+    {% load static %}
+
+    <style>
+        :root {
+            --click-color: rgb(77, 152, 218);
+            --greyed: rgb(179, 179, 179);
+            --dark-greyed: rgb(83, 83, 83);
+            --very-light-grey: rgb(214, 214, 214);
+
+            --dark-bg-color: rgb(65, 65, 65);
+            --dark-list-accent-color: rgb(49, 49, 49);
+            --dark-blur-color: rgba(15, 15, 15, 0.582);
+
+            --light-bg-color: rgb(223, 223, 223);
+            --light-list-accent-color: rgb(214, 214, 214);
+            --light-blur-color: rgba(104, 104, 104, 0.582);
+
+            --height: 100%;
+            --subjects-height: 160px;
+            --duration: 1;
+        }
+
+        body {
+            overflow-x: hidden;
+            display: block;
+        }
+
+        * {
+            font-family: sans-serif;
+            transition: background-color 0.3s ease-in-out;
+
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .timetable {
+            width: 100%;
+            position: relative;
+        {#display: flex;#} justify-content: center;
+        {#height: 80vh;#} display: block;
+        }
+
+
+        table {
+            margin: 0 auto;
+            height: 100%;
+            width: auto;
+            border-spacing: 0;
+            border-collapse: revert;
+            position: relative;
+        {#display:block;#}
+        }
+
+        tbody {
+            display: flex;
+            flex-flow: row;
+            width: auto;
+            height: 100%;
+            position: relative;
+        }
+
+
+        table .time {
+            background-color: #dcdde2;
+            padding: 30px 15px;
+            text-align: center;
+        }
+
+        body.dark table .time {
+            background-color: var(--dark-list-accent-color);
+            color: var(--greyed);
+        }
+
+        table tr td {
+            position: relative;
+
+            flex: 1 0 auto;
+            {#margin-top: 4px;#}
+            padding-top: 4px;
+            height: calc(var(--subjects-height) * var(--duration));
+        }
+
+
+        table tr.time {
+            display: flex;
+            flex-flow: column;
+            padding: 0;
+            height: 100%;
+            flex: 0 1 auto;
+            border-left: none;
+        }
+
+        table tr.time td {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-flow: column;
+            font-size: 110%;
+        }
+
+        table tr.time td.is-break{
+            font-size: 80%;
+        }
+
+        table tr.time td:nth-child(even) {
+            background-color: rgba(148, 148, 148, 0.6);
+        }
+
+        body.dark table tr.time td:nth-child(even) {
+            background-color: var(--dark-list-accent-color);
+        }
+
+        table tr.time td hr {
+            width: 80%;
+            height: 1px;
+            background-color: transparent;
+            border: none;
+            position: absolute;
+            bottom: 0;
+            margin: 0;
+        }
+
+        body.dark table tr.time td hr {
+
+            background-color: var(--very-light-grey);
+
+        }
+
+        table tr.active .day {
+            color: rgb(255, 192, 57);
+
+        }
+
+
+        table td.day {
+            width: 100%;
+            height: 50px;
+            text-align: center;
+
+            font-size: 25px;
+            display: flex;
+            justify-content: center;
+            border-bottom: 1px solid grey;
+        {#background-color: var(--dark-bg-color);#}
+        }
+
+        table tr.tt-day {
+            flex: 1 1 auto;
+            width: 150px;
+            border-left: 1px solid rgba(99, 99, 101, 0.87);
+            padding: 0;
+            margin: 0 0 0 3px;
+
+            position: relative;
+        }
+
+
+        table tr.holidays {
+        {#background-color: rgba(26, 26, 26, 0.52);#}
+        }
+
+        table tr .holiday {
+        {#width: 100%;#} flex: 0 1 auto;
+        {#height: 100%;#}{#position: relative;#} position: absolute;
+            top: 40%;
+            transform: rotate(-90deg);
+        }
+
+        table tr .holiday span {
+            position: absolute;
+            bottom: 0;
+            font-size: 25px;
+            letter-spacing: 15px;
+        }
+
+        table .subjects {
+
+            padding-left: 2px;
+            display: flex;
+            width: 100%;
+
+            flex-flow: row;
+        }
+
+        table .subject {
+            text-align: center;
+            background-color: rgba(244, 159, 37, 1);
+            color: white;
+            margin: 1px;
+            border-radius: 10px;
+
+            flex: 1 0 0;
+            height: 100%;
+
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2),
+            0 6px 20px 0 rgba(0, 0, 0, 0.19);
+            position: relative;
+
+            min-width: 0;
+
+        }
+
+        table .subject h3 {
+            overflow-wrap: break-word;
+            position: relative;
+            text-align: center;
+        }
+
+        table .subject h4 {
+            font-size: 13px;
+            font-weight: normal;
+            overflow-wrap: break-word;
+            margin-bottom: 0;
+            padding: 0 3px;
+            position: relative;
+            text-align: center;
+        }
+
+        table .subject h5 {
+            margin-top: 3px;
+            margin-bottom: 8px;
+            position: absolute;
+            bottom: 0;
+            text-align: center;
+            width: 100%;
+
+        }
+
+        table .subject.cancelled {
+            pointer-events: none;
+            background-color: rgb(141, 139, 136);
+            border: rgba(31, 31, 32, 0.81) 1px solid;
+            text-decoration: line-through black solid;
+        }
+
+        table .subject.cancelled > * {
+            text-decoration: line-through black solid;
+            pointer-events: none;
+        }
+
+        table .subject.irregular {
+            background-color: rgb(152, 108, 217);
+        }
+
+        .timetable .passed {
+            pointer-events: none;
+            background:rgba(140, 140, 140, 0.35);
+
+        }
+        .timetable .passed.active {
+            border-bottom: 3px solid #f51c1c;
+        }
+
+
+        {#table .subject.passed#}
+
+        {#table .subjects.passed:after {#}
+        {#    content: "";#}
+        {#    position: absolute;#}
+        {#    top: 0;#}
+        {#    left: 0;#}
+        {#    width: 100%;#}
+        {#    height: var(--height);#}
+        {#    background-color: rgba(140, 140, 140, 0.35);#}
+            {#background-color: #4CAF50;#}
+        {#  #}
+
+
+        svg {
+
+            width: 95%;
+            height: 95%;
+            position: absolute;
+            left: 2.5%;
+            top: 2.5%;
+            z-index: 1;
+        }
+
+        line {
+            position: relative;
+            stroke: #e2e2e2;
+            stroke-width: 2px;
+            z-index: 1;
+        }
+
+        .date-pick {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-flow: column;
+        }
+
+        .date-pick input {
+            border: none;
+            border-radius: 2px;
+            font-size: 15px;
+            width: 90%;
+        }
+
+        body.dark .date-pick input {
+            color: black;
+            background-color: var(--greyed);
+
+        }
+
+        .date-pick img {
+            width: 35px;
+        }
+
+        .ready {
+            color: rgba(241, 49, 33, 0.91);
+            display: flex;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 22px;
+            text-align: center;
+        }
+
+        .header {
+            width: 100%;
+            display: flex;
+            flex-flow: column;
+            justify-content: center;
+
+            margin-bottom: 20px;
+        }
+
+        .header span.text {
+            font-weight: normal;
+            position: relative;
+            width: auto;
+            margin: 0 auto;
+            font-size: 30px;
+        }
+
+        .header span.text:before {
+            content: "";
+            position: absolute;
+            width: 70%;
+            height: 1px;
+            bottom: 0;
+            left: 10px;
+            border-bottom: 2px solid var(--greyed);
+            border-radius: 100%;
+        }
+
+        body.dark {
+            background-color: var(--dark-bg-color);
+            color: white;
+        }
+
+        .ms {
+            display: flex;
+            align-items: center;
+        }
+
+        .ms span {
+            color: white;
+            background-color: var(--click-color);
+            font-family: 'Noto Sans JP', sans-serif;
+            padding: 5px 20px;
+            border-radius: 3px;
+            position: relative;
+            margin: 10px 5px;
+        }
+
+        .ms .new {
+            overflow: hidden;
+
+            margin-right: auto;
+        {#height: 50px;#} display: flex;
+            align-items: center;
+            width: 0;
+        {#height: 0;#} transition: width 0.4s ease-in-out;
+
+        }
+
+        .ms .new.open {
+            width: 370px;
+
+        }
+
+        .ms .new span {
+            overflow: hidden;
+            white-space: nowrap;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2),
+            0 6px 8px 0 rgba(0, 0, 0, 0.19);
+        }
+
+        .darkmode-switch {
+
+
+            left: 20px;
+            top: 20px;
+            border: none;
+            background-color: var(--very-light-grey);
+            border-radius: 6px;
+            padding: 12px;
+            height: 60px;
+            width: 60px;
+            margin-right: 0;
+            flex: 0 0 auto;
+        }
+
+        body.dark .darkmode-switch {
+            background-color: var(--dark-greyed);
+        }
+
+        .darkmode-switch img {
+            width: 35px;
+
+            transform: rotate(180deg);
+            transition: transform 0.5s ease-in-out;
+        }
+
+        body.dark .darkmode-switch img {
+
+            transform: rotate(0deg);
+        }
+
+        .banner {
+            z-index: 1;
+            position: absolute;
+            top: 70px;
+            right: -170px;
+            width: 500px;
+
+            overflow: hidden;
+            color: white;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2),
+            0 6px 20px 0 rgba(0, 0, 0, 0.19);
+            background-color: #d50004;
+            transform: rotate(45deg);
+
+            font-size: 22px;
+            padding: 10px;
+            margin: 10px;
+
+            text-align: center;
+        }
+
+        .data-ts {
+            color: darkgray;
+            font-size: 18px;
+            margin-left: 5%;
+        }
+
+        .day-nav{
+            width: 90%;
+            height: auto;
+            margin: 0 auto;
+            margin-bottom: 50px;
+        }
+        .day-nav button{
+            color: white;
+            background-color: var(--click-color);
+            font-size: 22px;
+            border: none;
+            border-radius: 3px;
+            padding: 5px 20px;
+            display: block;
+            cursor: pointer;
+        }
+        .day-nav button.last{
+            float: left;
+        }
+        .day-nav button.next{
+            float: right;
+        }
+
+
+    </style>
+</head>
+<body class="dark">
+
+<span class="banner" id="loadtimeseen" hidden>Now with <strong>-80%</strong> load time!</span>
+
+
+<div class="header">
+    <div class="ms">
+        <button class="darkmode-switch" id="dm_switch"><img id="dm_switch_img" src="" alt="switch mode"></button>
+        <div class="new" id="new_ms">
+
+            <span id="new_ms_text">New! Switch between light and dark mode!</span>
+        </div>
+    </div>
+    <span class="text">Matzes awesome timetable from <strong>{{ dates.0 }}</strong> to <strong>{{ dates.1 }}</strong></span>
+</div>
+
+<div class="day-nav">
+    <button class="last" id="dn_last"><<<</button>
+    <button class="next" id="dn_next">>>></button>
+</div>
+<br>
+<br>
+<div class="timetable">
+    <table>
+        {#        <tr>#}
+        {#            <th class="time">Time</th>#}
+        {#            <th>Subject</th>#}
+        {#        </tr>#}
+        <tr class="time">
+            <td class="day date-pick">
+                <label for="date_input">
+                    Week
+                </label>
+
+                <input id="date_input" value="{{ day_formatted }}" type="date">
+            </td>
+            {% for time in times %}
+                <td class="{% if time.2 %}is-break{% endif %}" style="--duration: {{ time.3 }};" ><span>{{ time.0 }}{% if time.2 %} - {% else %}<br>-<br>{% endif %}{{ time.1 }}</span>
+                    <hr/>
+                </td>
+            {% endfor %}
+            <td class="fill"></td>
+        </tr>
+
+        {% for day in timetable %}
+            <tr  class="{% if day.day_formatted == today %}active{% endif %} tt-day {% if day.is_holiday %}holidays{% endif %}" data-day-formatted="{{ day.day_formatted }}" data-ts-end="{{ day.day_end_ts }}" data-ts-start="{{ day.day_start_ts }}">
+                <td class="day">{{ day.week_day }}</td>
+                {% if day.is_holiday == True %}
+                    <td class="holiday"><span>{{ day.holiday.name }}</span></td>
+                {% else %}
+                    {% for period in day.periods %}
+                        <td style="--duration: {{ period.duration }};" class="subjects {% if period.is_break %}is-break{% endif %} "  data-ts-start="{{ period.ts_start }}"
+                                     data-ts-end="{{ period.ts_end }}">
+                            {% for su in period.subjects %}
+                                <div class="subject {{ su.code }}">
+                                    {% if su.code == "cancelled" %}
+                                        <svg>
+                                            <line x1='0' y1='100%' x2='100%' y2='0'></line>
+                                        </svg>
+                                    {% endif %}
+                                    <h3>{{ su.name }}</h3>
+                                    <h4>{{ su.fullname }}</h4>
+                                    <h5>{{ su.room }}</h5>
+
+                                </div>
+                            {% endfor %}
+                        </td>
+                    {% endfor %}
+
+                    <td class="ready">Ready at {{ day.at_home }}</td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+    </table>
+</div>
+<br>
+<p class="data-ts">Data from {{ datetime_now_formatted }}</p>
+
+<script>
+    const today = "{{ today }}";
+    const dm_switch = document.getElementById("dm_switch");
+    const local_storage = window.localStorage;
+    let data = {}
+    try {
+        data = JSON.parse(local_storage.getItem("key"))
+        if (data.darkmode === undefined) {
+            data.darkmode = true
+        }
+        if (data.loadtimeseen === undefined) {
+            data.loadtimeseen = 0
+        }
+        if (data.newmsknown === undefined) {
+            data.newmsknown = false;
+        }
+    } catch {
+        data = {
+            darkmode: true,
+            loadtimeseen: 0,
+            newmsknown: false
+        }
+    }
+    data.loadtimeseen += 1;
+
+    if (data.loadtimeseen > 10) {
+        document.getElementById("loadtimeseen").hidden = true;
+    }
+
+    const new_ms = document.getElementById("new_ms")
+
+    if (!data.newmsknown) {
+        setTimeout(() => new_ms.classList.add("open"), 1700);
+        setTimeout(() => new_ms.classList.remove("open"), 30000)
+    }
+
+    const body = document.body;
+    const timetable = document.querySelector(".timetable");
+
+
+    const modeswitch_img_light = "{% static "imgs/mode_light.png"%}";
+    const modeswitch_img_dark = "{% static "imgs/mode_dark.png"%}";
+    const dm_switch_img = document.getElementById("dm_switch_img")
+
+
+    const set_dark_mode = (dm, click = false) => {
+        if (click) {
+            new_ms.classList.remove("open")
+            data.newmsknown = true;
+        }
+        if (dm) {
+            body.classList.add("dark")
+            dm_switch_img.alt = "Switch to lightmode"
+            dm_switch_img.src = modeswitch_img_light;
+            data.darkmode = true;
+            {#datepicker_img.src = datepicker_light_img;#}
+        } else {
+            body.classList.remove("dark")
+            dm_switch_img.alt = "Switch to darkmode"
+            dm_switch_img.src = modeswitch_img_dark;
+            data.darkmode = false;
+            {#datepicker_img.src = datepicker_dark_img;#}
+        }
+        local_storage.setItem("key", JSON.stringify(data))
+    }
+
+    set_dark_mode(data.darkmode)
+
+    dm_switch.onclick = () => set_dark_mode(!!!data.darkmode, true)
+
+
+    {##}
+
+    const input = document.getElementById("date_input");
+    input.onchange = () => {
+        const v = input.value;
+        location.href = location.origin + "/untis/timetable?key={{ api_key }}&webview=True&day=" + v;
+    }
+
+    const setPassedTime = ()=>{
+
+        const rows = document.querySelectorAll(".tt-day");
+        const sample_row = rows[0];
+        const sample_day_label = sample_row.querySelector(".day");
+        const row_width = sample_row.clientWidth + 2;
+        const row_height = sample_row.clientHeight - sample_day_label.clientHeight;
+        {#const #}
+        {#const rect = row.getBoundingClientRect();#}
+        {#const row_pos = [rect.left, rect.top];#}
+
+        const timestamp_now = Date.now() / 1000;
+
+
+
+        for(let e of timetable.querySelectorAll("div.passed")){
+            e.remove();
+        }
+
+        for(let row of rows) {
+            const rect = row.getBoundingClientRect()
+            const element = document.createElement("div");
+            const day_formatted = row.dataset.dayFormatted;
+            {#console.log(day_formatted, today)#}
+            const start = row.dataset.tsStart;
+            const end = row.dataset.tsEnd;
+            const time_diff = end - start;
+            const time_offset = timestamp_now - start;
+
+            const height = Math.min(1, time_offset / time_diff) * row_height;
+
+            element.className = "passed";
+
+            const style = {
+                position: "absolute",
+                width: row_width + "px",
+                height: height + "px",
+                top: sample_day_label.clientHeight + "px",
+                left: rect.left - 6 + "px"
+            };
+            for (let s in style) {
+                element.style[s] = style[s];
+            }
+            if(day_formatted == today){
+                element.classList.add("active");
+            }
+            timetable.appendChild(element);
+        }
+
+    }
+    setPassedTime()
+    window.onresize = e => setPassedTime();
+    setInterval(setPassedTime, 60000);
+
+
+
+
+    {#const subjects = document.querySelectorAll(".subjects");#}
+    {#for (let sub of subjects) {#}
+    {#    let sub_ts_start = sub.dataset.tsStart;#}
+    {#    let sub_ts_end = sub.dataset.tsEnd;#}
+    {#    let len = sub_ts_end - sub_ts_start;#}
+    {##}
+    {#    if (timestamp_now > sub_ts_start) {#}
+    {#        let ts = timestamp_now - sub_ts_start;#}
+    {#        sub.style.setProperty("--height", Math.min(100, parseInt((ts / len) * 100)) + "%");#}
+    {#    }else{#}
+    {#        sub.style.setProperty("--height", "0%");#}
+    {#    }#}
+
+
+
+    const dn_last = document.getElementById("dn_last");
+    const dn_next = document.getElementById("dn_next");
+    dn_last.onclick = () => {
+        const v = input.value;
+        const d = new Date(v).getTime() - 1000 * 60 * 60 * 24 * 7;
+
+        location.href = location.origin + "/untis/timetable?key={{ api_key }}&webview=True&day=" + new Date(d).toISOString().substring(0, 10);
+    }
+    dn_next.onclick = () =>{
+        const v = input.value;
+        const d = new Date(v).getTime() + 1000 * 60 * 60 * 24 * 7;
+
+        location.href = location.origin + "/untis/timetable?key={{ api_key }}&webview=True&day=" + new Date(d).toISOString().substring(0, 10);
+    }
+
+</script>
+</body>
+
+</html>

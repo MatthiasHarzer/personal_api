@@ -9,3 +9,4 @@ firebase_admin~=5.0.2
 py-firebase-dynamic-links~=1.0.1
 django-cors-headers~=3.10.0
 uwsgi~=2.0.20
+icalendar~=5.0.1

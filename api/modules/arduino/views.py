@@ -5,7 +5,7 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 
-from api.util import db_utils, converter, utils
+from api.util import db_utils, tc, utils
 from api.util.decorators import requires, optional
 
 def home(_):
@@ -27,7 +27,7 @@ def get_arduino_formatted_time(request):
 
 def get_arduino_clock_settings(request):
     """Returns the current clock settings in the format that the Arduino expects (dict-like)"""
-    settings = db_utils.get_store_item("arduino_clock_settings", converter.str_to_dict)
+    settings = db_utils.get_store_item("arduino_clock_settings", tc.str_to_dict)
     if settings:
         return JsonResponse(settings)
     return utils.error(500, "crash")
@@ -47,7 +47,7 @@ def set_arduino_clock_settings(request, sdata, dformat=None):
     success = False
 
     if dformat == "json" or not dformat:  # Format is optional when sending jsonString
-        settings_data = converter.str_to_dict(sdata)
+        settings_data = tc.str_to_dict(sdata)
         try:
             settings_data: dict = json.loads(sdata)
             success = True
@@ -64,7 +64,7 @@ def set_arduino_clock_settings(request, sdata, dformat=None):
     if len(settings_data.items()) <= 0:
         return utils.error(401, {"invalid": ["sdata"]})
 
-    settings = db_utils.get_store_item("arduino_clock_settings", converter.str_to_dict) or {}
+    settings = db_utils.get_store_item("arduino_clock_settings", tc.str_to_dict) or {}
 
     for skey, svalue in settings_data.items():
         settings[skey] = svalue
@@ -87,7 +87,7 @@ def set_single_arduino_clock_setting(request, skey, svalue):
     if not skey or not svalue:
         return utils.error(401, {"missing_one_or_more": ["skey", "svalue"]})
 
-    settings = db_utils.get_store_item("arduino_clock_settings", converter.str_to_dict) or {}
+    settings = db_utils.get_store_item("arduino_clock_settings", tc.str_to_dict) or {}
 
     settings[skey] = svalue
 
