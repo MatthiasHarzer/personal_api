@@ -28,6 +28,8 @@ CLASS_TIMES = [
 BASE_DIR = settings.BASE_DIR
 CACHE_DIR = os.path.join(BASE_DIR, "cache", "timetable")
 
+if not os.path.exists(CACHE_DIR):
+    os.makedirs(CACHE_DIR, exist_ok=True)
 
 @dataclass
 class Event:
@@ -70,14 +72,11 @@ class Timetable:
         }
 
 
-def get_timetable_file(url, file_type: str = "ics") -> str:
+def get_timetable_file(url) -> str:
     """Downloads a file from the given url and saves it to the given file path."""
     id_ = url.split("/")[-1]
 
-    if not os.path.exists(CACHE_DIR):
-        os.makedirs(CACHE_DIR, exist_ok=True)
-
-    file_path = f"{CACHE_DIR}/{id_}.{file_type}"
+    file_path = f"{CACHE_DIR}/{id_}.ics"
     if os.path.isfile(file_path) and time.time() - os.path.getmtime(file_path) < FILE_MAX_AGE:
         return file_path
 
@@ -89,7 +88,7 @@ def get_timetable_file(url, file_type: str = "ics") -> str:
 def get_timetable(url: str = None) -> Timetable:
     """Returns the current timetable."""
     url = url or secrets.KIT_TIMETABLE_WEBCAL_URL
-    with open(get_timetable_file(url, "ics"), "r") as f:
+    with open(get_timetable_file(url), "r") as f:
         cal: Calendar = Calendar.from_ical(f.read())
 
         events: list[Event] = []
