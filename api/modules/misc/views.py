@@ -1,6 +1,7 @@
 import datetime
 import time
 import traceback
+from threading import Thread
 
 import requests
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
@@ -125,8 +126,11 @@ def restart_discord_bot_service(request):
 
 @requires(permission="api")
 def restart_self(request):
-    try:
+    def thread():
+        time.sleep(1)
         requests.post("http://127.0.0.1:777/exec-as-root", json={"command": ["systemctl", "restart", "api"]})
+    try:
+        Thread(target=thread).start()
         return utils.success()
     except Exception as e:
         return JsonResponse({"message": "failed", "details": e})
