@@ -75,7 +75,7 @@ def get_timetable_file(url, file_type: str = "ics") -> str:
     id_ = url.split("/")[-1]
 
     if not os.path.exists(CACHE_DIR):
-        os.mkdir(CACHE_DIR)
+        os.makedirs(CACHE_DIR, exist_ok=True)
 
     file_path = f"{CACHE_DIR}/{id_}.{file_type}"
     if os.path.isfile(file_path) and time.time() - os.path.getmtime(file_path) < FILE_MAX_AGE:
