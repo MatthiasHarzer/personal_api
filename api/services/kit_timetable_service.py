@@ -68,7 +68,8 @@ class Timetable:
 
     def as_json(self):
         return {
-            "events": {i: [e.__dict__() for e in es] for i, es in self.events_by_weekday.items() }
+            "events": {i: [e.__dict__() for e in es] for i, es in self.events_by_weekday.items() },
+            "class_times": CLASS_TIMES,
         }
 
 
