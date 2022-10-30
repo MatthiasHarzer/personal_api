@@ -7,6 +7,7 @@ urlpatterns = \
     [
         path("untis/timetable", views.get_untis_timetable),
         path("kit/timetable", views.get_kit_timetable),
+        path("kit/timetableByUrl", views.get_kit_timetable_public),
         path("services/discord-bot/restart", views.restart_discord_bot_service),
         path("services/self/restart", views.restart_self),
         path("steammarket/itemprice", views.get_price_from_steam_market),

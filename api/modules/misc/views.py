@@ -1,4 +1,5 @@
 import datetime
+import re
 import time
 import traceback
 from threading import Thread
@@ -106,10 +107,25 @@ def get_untis_timetable(request, key, webview="False", day=None, timeformat=None
 
 
 @requires(permission="kit")
-def get_kit_timetable(request):
+@optional("url")
+def get_kit_timetable(request, url=None):
     """Returns the timetable for the current day"""
 
     timetable: kit_timetable_service.Timetable = kit_timetable_service.get_timetable()
+
+    return JsonResponse(timetable.as_json())
+
+
+@requires(permission="kit-public", query_params="url")
+def get_kit_timetable_public(request, url):
+    kit_webcal_url_re = re.compile("^https?:\/\/campus\.kit\.edu\/sp\/webcal\/\w*")
+
+    # print(url)
+
+    if not kit_webcal_url_re.match(url):
+        return error(400, "Invalid URL")
+
+    timetable: kit_timetable_service.Timetable = kit_timetable_service.get_timetable(url)
 
     return JsonResponse(timetable.as_json())
 
@@ -128,6 +144,7 @@ def restart_self(request):
     def thread():
         time.sleep(1)
         requests.post("http://127.0.0.1:777/exec-as-root", json={"command": ["systemctl", "restart", "api"]})
+
     try:
         Thread(target=thread).start()
         return utils.success()
