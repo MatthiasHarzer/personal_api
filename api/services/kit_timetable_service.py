@@ -31,6 +31,14 @@ CACHE_DIR = os.path.join(BASE_DIR, "cache", "timetable")
 if not os.path.exists(CACHE_DIR):
     os.makedirs(CACHE_DIR, exist_ok=True)
 
+type_map = {
+    "ü": "exercise",
+    "vü": "lecture",
+    "v": "lecture",
+    "tu": "tutorial",
+}
+
+
 @dataclass
 class Event:
     """Represents a single event in the timetable."""
@@ -40,6 +48,14 @@ class Event:
     location: str
     url: str
 
+    @property
+    def event_type(self) -> str:
+        """Returns the type of the event."""
+        for short, type_ in type_map.items():
+            if f"({short})" in self.summary.lower():
+                return type_
+        return "other"
+
     def __dict__(self):
         return {
             "start": self.start.time(),
@@ -47,6 +63,7 @@ class Event:
             "summary": self.summary,
             "location": self.location,
             "url": self.url,
+            "type": self.event_type,
         }
 
 
@@ -68,7 +85,7 @@ class Timetable:
 
     def as_json(self):
         return {
-            "events": {i: [e.__dict__() for e in es] for i, es in self.events_by_weekday.items() },
+            "events": {i: [e.__dict__() for e in es] for i, es in self.events_by_weekday.items()},
             "class_times": CLASS_TIMES,
         }
 
