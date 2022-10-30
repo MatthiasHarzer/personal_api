@@ -47,6 +47,7 @@ class Event:
     summary: str
     location: str
     url: str
+    recurring: bool = False
 
     @property
     def event_type(self) -> str:
@@ -115,12 +116,15 @@ def get_timetable(url: str = None) -> Timetable:
             if component.name != "VEVENT":
                 continue
 
+            recurring = component.get("RRULE") is not None
+
             events.append(Event(
                 start=component.get("dtstart").dt,
                 end=component.get("dtend").dt,
                 summary=component.get("summary"),
                 location=component.get("location"),
                 url=component.get("url"),
+                recurring=recurring,
             ))
 
         return Timetable(events=events)
