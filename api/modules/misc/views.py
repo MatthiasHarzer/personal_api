@@ -3,6 +3,7 @@ import re
 import time
 import traceback
 from threading import Thread
+from typing import Optional
 
 import requests
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
@@ -107,25 +108,40 @@ def get_untis_timetable(request, key, webview="False", day=None, timeformat=None
 
 
 @requires(permission="kit")
-@optional("url")
-def get_kit_timetable(request, url=None):
+@optional("day")
+def get_kit_timetable(request, day=None):
     """Returns the timetable for the current day"""
 
-    timetable: kit_timetable_service.Timetable = kit_timetable_service.get_timetable()
+    parsed_day: Optional[datetime.datetime] = None
+
+    if day is not None:
+        parsed_day = utils.parse_str_to_datetime(day)
+
+        if parsed_day is None:
+            return utils.error(400, "Invalid date format. Please use YYYY-MM-DD")
+
+    timetable: kit_timetable_service.Timetable = kit_timetable_service.get_timetable(week_day=parsed_day)
 
     return JsonResponse(timetable.as_json())
 
 
 @requires(permission="kit-public", query_params="url")
-def get_kit_timetable_public(request, url):
+@optional("day")
+def get_kit_timetable_public(request, url, day=None):
     kit_webcal_url_re = re.compile("^https?:\/\/campus\.kit\.edu\/sp\/webcal\/\w*")
 
-    # print(url)
+    parsed_day: Optional[datetime.datetime] = None
+
+    if day is not None:
+        parsed_day = utils.parse_str_to_datetime(day)
+
+        if parsed_day is None:
+            return utils.error(400, "Invalid date format. Please use YYYY-MM-DD")
 
     if not kit_webcal_url_re.match(url):
         return error(400, "Invalid URL")
 
-    timetable: kit_timetable_service.Timetable = kit_timetable_service.get_timetable(url)
+    timetable: kit_timetable_service.Timetable = kit_timetable_service.get_timetable(url, week_day=parsed_day)
 
     return JsonResponse(timetable.as_json())
 

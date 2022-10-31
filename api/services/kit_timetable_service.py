@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import datetime
 import os
 import time
@@ -6,6 +8,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from icalendar import Calendar
+from icalendar.cal import Component
 
 from api import secrets
 from personal_api import settings
@@ -68,11 +71,50 @@ class Event:
             "recurring": self.recurring,
         }
 
+    @staticmethod
+    def from_ical_event_if_valid(event: Component, current_week: list[datetime.datetime]) -> Optional[Event]:
+        """
+        Creates an Event from an icalendar event if it is valid.
+        :param event: The icalendar event.
+        :param current_week: A list containing all 7 datetime.datetimes from the current week.
+        """
+        start: datetime.datetime = event.get("dtstart").dt
+        end: datetime.datetime = event.get("dtend").dt
+        summary = event.get("summary")
+        location = event.get("location")
+        url = event.get("url")
+        recurring = event.get("RRULE") is not None
+
+        # check if the event is non recurring and in the current week
+        if not recurring and start.date() not in [w.date() for w in current_week]:
+            return None
+
+        day = current_week[start.weekday()]  # the weekday of the event in the current week
+
+        exceptions = event.get("exdate")
+
+        # check if the event has exception dates and if an exception is in the current weeks day
+        if exceptions:
+            for exception in exceptions:
+                for exc in exception.dts:
+                    if exc.dt.date() == day.date():
+                        return None
+
+        return Event(
+            start=datetime.datetime.combine(day, start.time()),
+            end=datetime.datetime.combine(day, end.time()),
+            summary=summary,
+            location=location,
+            url=url,
+            recurring=recurring,
+        )
+
 
 @dataclass
 class Timetable:
     """Represents the current timetable."""
     events: list[Event]
+    week: list[datetime.datetime]
 
     @property
     def events_by_weekday(self) -> dict[int, list[Event]]:
@@ -89,10 +131,12 @@ class Timetable:
         return {
             "events": {i: [e.__dict__() for e in es] for i, es in self.events_by_weekday.items()},
             "class_times": CLASS_TIMES,
+            "monday": self.week[0].date(),
+            "friday": self.week[4].date(),
         }
 
 
-def get_timetable_file(url) -> str:
+def _get_timetable_file(url) -> str:
     """Downloads a file from the given url and saves it to the given file path."""
     id_ = url.split("/")[-1]
 
@@ -105,10 +149,15 @@ def get_timetable_file(url) -> str:
     return file_path
 
 
-def get_timetable(url: str = None) -> Timetable:
+def get_timetable(url: str = None, week_day: datetime.datetime = None) -> Timetable:
     """Returns the current timetable."""
+    week_day = week_day or datetime.datetime.now()
     url = url or secrets.KIT_TIMETABLE_WEBCAL_URL
-    with open(get_timetable_file(url), "r") as f:
+
+    monday = week_day - datetime.timedelta(days=week_day.weekday())
+    week = [monday + datetime.timedelta(days=i) for i in range(7)]  # the current week
+
+    with open(_get_timetable_file(url), "r") as f:
         cal: Calendar = Calendar.from_ical(f.read())
 
         events: list[Event] = []
@@ -117,15 +166,9 @@ def get_timetable(url: str = None) -> Timetable:
             if component.name != "VEVENT":
                 continue
 
-            recurring = component.get("RRULE") is not None
+            e = Event.from_ical_event_if_valid(component, week)
 
-            events.append(Event(
-                start=component.get("dtstart").dt,
-                end=component.get("dtend").dt,
-                summary=component.get("summary"),
-                location=component.get("location"),
-                url=component.get("url"),
-                recurring=recurring,
-            ))
+            if e:
+                events.append(e)
 
-        return Timetable(events=events)
+        return Timetable(events=events, week=week)

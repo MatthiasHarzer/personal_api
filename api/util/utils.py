@@ -4,7 +4,7 @@ import json
 import random
 import string
 import time
-from typing import Any
+from typing import Any, Optional
 
 from django.http import JsonResponse
 
@@ -61,3 +61,19 @@ def error(code: int, message: Any):
 def success():
     """Template for success-JsonResponse"""
     return JsonResponse({"success": True})
+
+
+def parse_str_to_datetime(datetime_: str) -> Optional[datetime.datetime]:
+    """Converts a datetime string in format %H:%M:%S to datetime.datetime object"""
+    try:
+        return datetime.datetime.strptime(datetime_, "%Y-%m-%d")
+    except ValueError:
+        return None
+
+
+def date_is_in_current_week(date: datetime.datetime) -> bool:
+    """Checks if the given date is in the current week"""
+    today = datetime.date.today()
+    monday = today - datetime.timedelta(days=today.weekday())
+    friday = monday + datetime.timedelta(days=5)
+    return monday <= date.date() <= friday
