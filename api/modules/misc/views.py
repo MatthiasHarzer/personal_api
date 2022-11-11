@@ -1,8 +1,6 @@
 import datetime
-import re
 import time
 from threading import Thread
-from typing import Optional
 
 import requests
 from django.http import HttpResponseRedirect, JsonResponse, HttpResponse
@@ -10,10 +8,9 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 
 from api import secrets
-from api.services import kit_timetable_service
 from api.services.steammarketcrawler import SteamMarketCrawler
 from api.services.untis import Untis
-from api.util import db_utils, utils, tc
+from api.util import db_utils, utils
 from api.util.decorators import requires, optional
 from api.util.telegram_bot import send_telegram_message
 from api.util.utils import to_formatted_time, to_formatted_date, error
@@ -104,45 +101,6 @@ def get_untis_timetable(request, key, webview="False", day=None, timeformat=None
     except Exception as e:
         # print(traceback.format_exc())
         return error(500, str(e))
-
-
-@requires(permission="kit")
-@optional("day")
-def get_kit_timetable(request, day=None):
-    """Returns the timetable for the current day"""
-
-    parsed_day: Optional[datetime.datetime] = None
-
-    if day is not None:
-        parsed_day = utils.parse_str_to_datetime(day)
-
-        if parsed_day is None:
-            return utils.error(400, "Invalid date format. Please use YYYY-MM-DD")
-
-    timetable: kit_timetable_service.Timetable = kit_timetable_service.get_timetable(week_day=parsed_day)
-
-    return JsonResponse(timetable.as_json())
-
-
-@requires(permission="kit-public", query_params="url")
-@optional("day")
-def get_kit_timetable_public(request, url, day=None):
-    kit_webcal_url_re = re.compile("^https?:\/\/campus\.kit\.edu\/sp\/webcal\/\w*")
-
-    parsed_day: Optional[datetime.datetime] = None
-
-    if day is not None:
-        parsed_day = utils.parse_str_to_datetime(day)
-
-        if parsed_day is None:
-            return utils.error(400, "Invalid date format. Please use YYYY-MM-DD")
-
-    if not kit_webcal_url_re.match(url):
-        return error(400, "Invalid URL")
-
-    timetable: kit_timetable_service.Timetable = kit_timetable_service.get_timetable(url, week_day=parsed_day)
-
-    return JsonResponse(timetable.as_json())
 
 
 @requires(permission="discord-bot")

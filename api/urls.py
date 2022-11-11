@@ -9,6 +9,7 @@ urlpatterns = \
     [
         path("", include("api.modules.misc.urls")),
         path("", base_views.home, name="home"),
+        path("kit/", include("api.modules.kit.urls")),
         path("arduino/", include("api.modules.arduino.urls"), name="arduino"),
         path("maps/", include("api.modules.maps.urls"), name="maps"),
         path("wgit/", include("api.modules.wgit.urls"), name="wgit"),
