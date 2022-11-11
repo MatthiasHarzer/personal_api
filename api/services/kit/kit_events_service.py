@@ -30,7 +30,7 @@ class KITEvent:
     lecturer: str
     format: str
     link: str
-    day: Optional[str] = None
+    time: Optional[str] = None
     room: Optional[str] = None
     room_link: Optional[str] = None
 
@@ -44,7 +44,7 @@ class KITEvent:
             "lecturer": self.lecturer,
             "format": self.format,
             "link": self.link,
-            "day": self.day,
+            "time": self.time,
             "room": self.room,
             "room_link": self.room_link,
             # "time": self.time
@@ -85,7 +85,7 @@ def _get_raw_data_from_cached_or_server(day: str, time: str, force: bool = False
         return req.text
 
 
-def _parse_raw_data(raw_data: str, day_short: str) -> list[KITEvent]:
+def _parse_raw_data(raw_data: str, day_short: str, time: str) -> list[KITEvent]:
     """Parses the raw data from the request"""
 
     soup = BeautifulSoup(raw_data, "html.parser")
@@ -118,7 +118,7 @@ def _parse_raw_data(raw_data: str, day_short: str) -> list[KITEvent]:
                 lecturer=host,
                 # day=day,
                 format=event_format,
-                # time=time,
+                time=time,
                 link=f"https://campus.kit.edu/sp/campus/all/event.asp?gguid={row_id}",
             )
             events.append(current_event)
@@ -131,19 +131,19 @@ def _parse_raw_data(raw_data: str, day_short: str) -> list[KITEvent]:
         elif current_event is not None:
             date_room = row_data[-1]
 
-            date_tags = date_room.select(".date")
+            # date_tags = date_room.select(".date")
             room_tags = date_room.select(".room")
             # print(date_tags)
 
             # Only add the event if it is on the given day
-            if len(date_tags) <= 0:
-                continue
-
-            date_text = date_tags[0].text
-            if not date_text.lower().startswith(day_short.lower()):
-                continue
-
-            current_event.day = date_text.split(", ")[-1]
+            # if len(date_tags) <= 0:
+            #     continue
+            #
+            # date_text = date_tags[0].text
+            # if not date_text.lower().startswith(day_short.lower()):
+            #     continue
+            #
+            # current_event.time = date_text.split(", ")[-1]
 
             if len(room_tags) <= 0:
                 continue
@@ -193,7 +193,9 @@ def get_events(day: str, time: str) -> list:
     raw_html = _get_raw_data_from_cached_or_server(day, time)
     short_day = _get_day_short(day)
 
-    data = _parse_raw_data(raw_html, short_day)
+    t = f"{time} - {CLASS_TIMES_AS_STRINGS_DICT[time]}"
+
+    data = _parse_raw_data(raw_html, short_day, t)
 
     # print(data)
 
