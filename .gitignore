@@ -7,3 +7,5 @@
 *.log
 *.sqlite3
 /personal_api/settings.py
+/cache
+*.ics

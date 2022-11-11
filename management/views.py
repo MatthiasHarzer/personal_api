@@ -3,9 +3,10 @@ from django.shortcuts import render
 import random
 import string
 
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render
 
+from api.util.decorators import requires
 from .forms import *
 from api.models import *
 
@@ -173,6 +174,36 @@ def create_or_edit_store_item(request, item_key=None):
     context["site"] = "store_new"
 
     return render(request, "management/store.html", context)
+
+
+@requires(superuser=True)
+def upload_or_edit_image(request):
+    """
+    Upload or edit an image
+    :param request:
+    :return:
+    """
+    if request.method == "POST":
+        form = UploadOrEditImageForm(request.POST, request.FILES)
+        if not form.is_valid():
+            return HttpResponseBadRequest("Invalid form")
+
+        
+        image = form.cleaned_data.get("image")
+        name = form.cleaned_data.get("name")
+        tags = form.cleaned_data.get("tags")
+        try:
+            image = Image.objects.get(name=name, tags=tags)
+            image.image = image
+            image.save()
+        except Image.DoesNotExist:
+            image = Image(name=name, image=image, tags=tags)
+            image.save()
+        return HttpResponseRedirect("/manage/images/")
+    else:
+        form = UploadOrEditImageForm()
+
+    return render(request, "management/image.html", {"form": form})
 
 
 def delete_store_item(request, item_key):

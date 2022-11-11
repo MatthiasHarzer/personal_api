@@ -2,7 +2,7 @@ from django import forms
 from django.forms import ModelForm
 
 # FORM presets
-from api.models import ApiKey
+from api.models import ApiKey, Image
 
 
 class PermissionMultipleChoiceFormField(forms.ModelMultipleChoiceField):
@@ -47,3 +47,10 @@ class StoreItemForm(forms.Form):
         self.fields["value"] = forms.CharField(max_length=50000, initial=value,
                                                widget=forms.TextInput(attrs={'autocomplete': 'off'}))
         self.fields["confidential"] = forms.BooleanField(initial=confidential, required=False)
+
+
+class UploadOrEditImageForm(ModelForm):
+    class Meta:
+        model = Image
+        fields = ('title', 'image', 'tags')
+

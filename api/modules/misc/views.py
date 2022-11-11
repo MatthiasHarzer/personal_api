@@ -1,7 +1,6 @@
 import datetime
 import re
 import time
-import traceback
 from threading import Thread
 from typing import Optional
 

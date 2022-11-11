@@ -1,27 +1,49 @@
 """
 Decorator for required permission and/or params for view (query_params returned as kwarg)
 """
-from typing import Union
+from typing import Union, Optional
 
 from api.models import ApiKey, Permission
 from api.util import tc
 from api.util.utils import error
 
 TypedParam = tuple[str, tc.TypeConverter]
+QueryParams = Union[list[Union[str, TypedParam]], str, TypedParam]
 
 
-def requires(permission: Union[list[str], str] = None, query_params: Union[list[str], str] = None):
+def _to_query_params_with_type(query_params: Optional[QueryParams]) -> set[tuple[str, tc.TypeConverter]]:
+    if query_params is None:
+        return set()
+
+    query_params: set = set(query_params if type(query_params) == list else [query_params])
+
+    query_params_with_type: set[tuple[str, tc.TypeConverter]] = set()
+    for param in query_params:
+        if type(param) == tuple:
+            query_params_with_type.add(param)
+        else:
+            query_params_with_type.add((param, str))
+
+    return query_params_with_type
+
+
+def requires(permission: Union[list[str], str] = None, query_params: QueryParams = None, superuser: bool = False,):
     """Requires a permission and/or query_params for the view"""
 
     # * Make params set
-    query_params: set = set([]) if query_params is None else set(
-        query_params if type(query_params) == list else [query_params])
     permission: set = set([]) if permission is None else set(permission if type(permission) == list else [permission])
+
+    # * Query params as set
+    query_params_with_type: set[tuple[str, tc.TypeConverter]] = _to_query_params_with_type(query_params)
 
     def decorator(func):
         def wrapper(*args, **kwargs):
             # * The first arg should be the request
             request = args[0]
+
+            # * Check if user is superuser
+            if superuser and not request.user.is_superuser:
+                return error(401, "Unauthorized")
 
             # * URL Params
             request_params = request.GET
@@ -47,15 +69,15 @@ def requires(permission: Union[list[str], str] = None, query_params: Union[list[
 
             # * Check for required params
             missing_qparams: list[str] = []
-            for query_param in query_params:
-                p = request_params.get(query_param, None)
+            for query_param, type_ in query_params_with_type:
+                value = request_params.get(query_param, None)
                 # print(query_param, p)
                 # * if p is none, the param wasn't found in the url -> add it to missing-list
-                if p is None:
+                if value is None:
                     missing_qparams.append(query_param)
                 # * else set it as kwarg
                 else:
-                    kwargs[query_param] = p
+                    kwargs[query_param] = value if value is None else type_(value)
             # * if one or more items in missing_qparams, return error page with missing info
             if len(missing_qparams) > 0:
                 return error(400, {"missing": missing_qparams})
@@ -72,14 +94,7 @@ def optional(query_params: Union[list[Union[str, TypedParam]], str, TypedParam],
     """Optional query_params for the view. If the param is found, it will be returned as kwarg with prefix/suffix"""
 
     # * Query params as set
-    query_params: set = set(query_params if type(query_params) == list else [query_params])
-
-    query_params_with_type: set[tuple[str, tc.TypeConverter]] = set()
-    for param in query_params:
-        if type(param) == tuple:
-            query_params_with_type.add(param)
-        else:
-            query_params_with_type.add((param, str))
+    query_params_with_type: set[tuple[str, tc.TypeConverter]] = _to_query_params_with_type(query_params)
 
     def decorator(func):
         def wrapper(*args, **kwargs):

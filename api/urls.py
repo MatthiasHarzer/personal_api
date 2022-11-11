@@ -12,5 +12,6 @@ urlpatterns = \
         path("arduino/", include("api.modules.arduino.urls"), name="arduino"),
         path("maps/", include("api.modules.maps.urls"), name="maps"),
         path("wgit/", include("api.modules.wgit.urls"), name="wgit"),
+        path("images/", include("api.modules.images.urls"), name="images"),
         path("test/wsupdatetest", base_views.ws_update_tester),
     ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

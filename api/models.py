@@ -24,3 +24,14 @@ class WebsocketClients(models.Model):
     scopes = models.JSONField(null=True, default=list)
 
 
+class ImageTag(models.Model):
+    id = models.CharField(max_length=200, primary_key=True)
+    title = models.CharField(max_length=200)
+    # image = models.ImageField(upload_to='images/')
+
+
+class Image(models.Model):
+    # id = models.CharField(max_length=200, primary_key=True)
+    title = models.CharField(max_length=200, default="")
+    image = models.ImageField(upload_to='images/')
+    tags = models.ManyToManyField(ImageTag)
