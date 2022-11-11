@@ -11,28 +11,9 @@ from icalendar import Calendar
 from icalendar.cal import Component
 
 from api import secrets
-from personal_api import settings
+from api.services.kit.consts import CACHE_DIR_TIMETABLE, CLASS_TIMES
 
 FILE_MAX_AGE = 60 * 60 * 24  # 1 days
-CLASS_TIMES = [
-    (datetime.time(8, 0), datetime.time(9, 30), False, 1),
-    (datetime.time(9, 30), datetime.time(9, 45), True, 1 / 6),
-    (datetime.time(9, 45), datetime.time(11, 15), False, 1),
-    (datetime.time(11, 15), datetime.time(11, 30), True, 1 / 6),
-    (datetime.time(11, 30), datetime.time(13, 0), False, 1),
-    (datetime.time(13, 0), datetime.time(14, 0), True, 2 / 3),
-    (datetime.time(14, 0), datetime.time(15, 30), False, 1),
-    (datetime.time(15, 30), datetime.time(15, 45), True, 1 / 6),
-    (datetime.time(15, 45), datetime.time(17, 15), False, 1),
-    (datetime.time(17, 15), datetime.time(17, 30), True, 1 / 6),
-    (datetime.time(17, 30), datetime.time(19, 0), False, 1),
-]
-
-BASE_DIR = settings.BASE_DIR
-CACHE_DIR = os.path.join(BASE_DIR, "cache", "timetable")
-
-if not os.path.exists(CACHE_DIR):
-    os.makedirs(CACHE_DIR, exist_ok=True)
 
 type_map = {
     "ü": "exercise",
@@ -140,7 +121,7 @@ def _get_timetable_file(url) -> str:
     """Downloads a file from the given url and saves it to the given file path."""
     id_ = url.split("/")[-1]
 
-    file_path = f"{CACHE_DIR}/{id_}.ics"
+    file_path = f"{CACHE_DIR_TIMETABLE}/{id_}.ics"
     if os.path.isfile(file_path) and time.time() - os.path.getmtime(file_path) < FILE_MAX_AGE:
         return file_path
 

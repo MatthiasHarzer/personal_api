@@ -78,9 +78,11 @@ def requires(permission: Union[list[str], str] = None, query_params: QueryParams
                 # * else set it as kwarg
                 else:
                     kwargs[query_param] = value if value is None else type_(value)
+            # print(args, kwargs)
             # * if one or more items in missing_qparams, return error page with missing info
             if len(missing_qparams) > 0:
                 return error(400, {"missing": missing_qparams})
+
             # * else run the function with new kwargs
             else:
                 return func(*args, **kwargs)
