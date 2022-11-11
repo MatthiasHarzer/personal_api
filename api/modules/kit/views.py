@@ -1,5 +1,6 @@
 import datetime
 import re
+import traceback
 from typing import Optional
 
 from django.http import JsonResponse
@@ -57,7 +58,8 @@ def get_kit_events(request, day: str, time: str):
 
     try:
         events = kit_events_service.get_events(day, time)
-    except Exception:
+    except Exception as e:
+        traceback.print_exc()
         # ignored
         pass
 

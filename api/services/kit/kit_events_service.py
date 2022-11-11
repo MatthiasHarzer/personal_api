@@ -1,3 +1,4 @@
+import datetime
 import os
 import urllib.parse
 from dataclasses import dataclass
@@ -28,6 +29,7 @@ class KITEvent:
     link: str
     day: Optional[str] = None
     room: Optional[str] = None
+
     # time: str
 
     def as_json(self):
@@ -77,7 +79,7 @@ def _get_raw_data_from_cached_or_server(day: str, time: str, force: bool = False
         return req.text
 
 
-def _parse_raw_data(raw_data: str) -> list[KITEvent]:
+def _parse_raw_data(raw_data: str, day_short: str) -> list[KITEvent]:
     """Parses the raw data from the request"""
 
     soup = BeautifulSoup(raw_data, "html.parser")
@@ -122,10 +124,29 @@ def _parse_raw_data(raw_data: str) -> list[KITEvent]:
             # }
         elif current_event is not None:
             date_room = row_data[-1]
-            if date := date_room.find("span", {"class": "date"}):
-                current_event.day = date.text
-            if room := date_room.find("span", {"class": "room"}):
-                current_event.room = room.text
+
+            date_tags = date_room.select(".date")
+            room_tags = date_room.select(".room")
+            # print(date_tags)
+
+            # Only add the event if it is on the given day
+            if len(date_tags) <= 0:
+                continue
+
+            date_text = date_tags[0].text
+            if not date_text.lower().startswith(day_short.lower()):
+                continue
+
+            current_event.day = date_text.split(", ")[-1]
+
+            if len(room_tags) <= 0:
+                continue
+
+            current_event.room = room_tags[0].text
+
+            # room = date_room.find("*", {"class": "room"})
+            # if room is not None:
+            #     current_event.room = room.text
             # date = date_room.find("span", {"class": "date"}).text
             # room = date_room.find("span", {"class": "room"}).text
 
@@ -135,12 +156,21 @@ def _parse_raw_data(raw_data: str) -> list[KITEvent]:
     return events
 
 
+def _get_day_short(day: str) -> str:
+    """Returns the short day name"""
+    date = datetime.datetime.strptime(day, "%d.%m.%Y")
+    return [
+        "Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"
+    ][date.weekday()]
+
+
 def get_events(day: str, time: str) -> list:
     """Returns a list of all events of the given type"""
 
     raw_html = _get_raw_data_from_cached_or_server(day, time)
+    short_day = _get_day_short(day)
 
-    data = _parse_raw_data(raw_html)
+    data = _parse_raw_data(raw_html, short_day)
 
     # print(data)
 
