@@ -18,8 +18,14 @@ PARSED_FORM_DATA = {
     k: v for k, v in [x.split("=") for x in RAW_FORM_DATA.split("&")]
 }
 
-
 # print(CLASS_TIMES_AS_STRINGS_DICT)
+EVENT_TYPE_MAPPING = {
+    "V": "Vorlesung",
+    "Ü": "Übung",
+    "P": "Praktikum",
+    "S": "Seminar",
+    "TU": "Tutorium",
+}
 
 
 @dataclass
@@ -27,6 +33,7 @@ class KITEvent:
     id: str
     title: str
     type: str
+    type_short: str
     lecturer: str
     format: str
     link: str
@@ -72,22 +79,22 @@ def _get_raw_data_from_cached_or_server(day: str, time: str, force: bool = False
     file_name = f"{day}_{time.replace(':', '.')}.html"
     file_path = os.path.join(CACHE_DIR_EVENTS, file_name)
     if os.path.exists(file_path) and not force:
-        with open(file_path, "r") as f:
+        with open(file_path, "r", encoding="utf-8") as f:
             return f.read()
     else:
         form_data = _build_form_data(day, time)
 
         req = requests.post(BASE_URL, data=form_data, headers=KIT_EXTENDED_SEARCH_HEADERS)
 
-        with open(file_path, "w") as f:
-            f.write(req.text)
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(req.text.encode("utf-8").decode("utf-8"))
 
         return req.text
 
 
-def _parse_raw_data(raw_data: str, day_short: str, time: str) -> list[KITEvent]:
+def _parse_raw_data(raw_data: str, day_short: str, time: str, event_types: Optional[list[str]] = None) -> list[
+    KITEvent]:
     """Parses the raw data from the request"""
-
     soup = BeautifulSoup(raw_data, "html.parser")
 
     table_content = soup \
@@ -106,15 +113,20 @@ def _parse_raw_data(raw_data: str, day_short: str, time: str) -> list[KITEvent]:
         # print(row_id)
 
         if row_id and KIT_EVENT_ID_REGEX.match(row_id):
-            title = row_data[2].find("a").text
-            host = row_data[3].text
-            event_type = row_data[4].text
-            event_format = row_data[6].text
+            title: str = row_data[2].find("a").text
+            host: str = row_data[3].text
+            event_type: str = row_data[4].text
+            event_type_short: str = row_data[5].text.encode("utf-8", "ignore").decode("utf-8")
+            event_format: str = row_data[6].text
+
+            if event_types is not None and event_type_short.lower() not in event_types:
+                continue
 
             current_event = KITEvent(
                 id=row_id,
                 title=title,
                 type=event_type,
+                type_short=event_type_short,
                 lecturer=host,
                 # day=day,
                 format=event_format,
@@ -122,6 +134,7 @@ def _parse_raw_data(raw_data: str, day_short: str, time: str) -> list[KITEvent]:
                 link=f"https://campus.kit.edu/sp/campus/all/event.asp?gguid={row_id}",
             )
             events.append(current_event)
+            # print(f"\n{row_id} {event_type}", end="")
             # events[current_event_id] = {
             #     "title": title,
             #     "host": host,
@@ -131,19 +144,17 @@ def _parse_raw_data(raw_data: str, day_short: str, time: str) -> list[KITEvent]:
         elif current_event is not None:
             date_room = row_data[-1]
 
-            # date_tags = date_room.select(".date")
+            date_tags = date_room.select(".date")
             room_tags = date_room.select(".room")
             # print(date_tags)
 
             # Only add the event if it is on the given day
-            # if len(date_tags) <= 0:
-            #     continue
+            if len(date_tags) <= 0:
+                continue
             #
-            # date_text = date_tags[0].text
-            # if not date_text.lower().startswith(day_short.lower()):
-            #     continue
-            #
-            # current_event.time = date_text.split(", ")[-1]
+            date_text = date_tags[0].text
+            if not date_text.lower().startswith(day_short.lower()):
+                continue
 
             if len(room_tags) <= 0:
                 continue
@@ -156,25 +167,8 @@ def _parse_raw_data(raw_data: str, day_short: str, time: str) -> list[KITEvent]:
                 if len(matches[0]) > 1:
                     building_number = matches[0][1]
                     current_event.room_link = f"https://www.kit.edu/campusplan/?id={building_number}"
-            # r
-
-            # room_href = room_tag.get("href")
-
-            # if room_href is not None:
-            #     rel_room_link = room_href.replace("../", "")
-            #     room_link = f"https://campus.kit.edu/sp/campus/{rel_room_link}"
-            #     current_event.room_link = room_link
 
             current_event.room = room_tag.text
-
-            # room = date_room.find("*", {"class": "room"})
-            # if room is not None:
-            #     current_event.room = room.text
-            # date = date_room.find("span", {"class": "date"}).text
-            # room = date_room.find("span", {"class": "room"}).text
-
-            # current_event.room = room
-            # current_event.day = date
 
     return events
 
@@ -187,16 +181,17 @@ def _get_day_short(day: str) -> str:
     ][date.weekday()]
 
 
-def get_events(day: str, time: str) -> list:
+def get_events(day: str, time: str, event_types_short: Optional[list[str]] = None) -> list:
     """Returns a list of all events of the given type"""
 
     raw_html = _get_raw_data_from_cached_or_server(day, time)
     short_day = _get_day_short(day)
 
+    event_types_short = [str(e).lower() for e in event_types_short if
+                         e is not None] if event_types_short is not None else None
+
     t = f"{time} - {CLASS_TIMES_AS_STRINGS_DICT[time]}"
 
-    data = _parse_raw_data(raw_html, short_day, t)
-
-    # print(data)
+    data = _parse_raw_data(raw_html, short_day, t, event_types_short)
 
     return [x.as_json() for x in data]

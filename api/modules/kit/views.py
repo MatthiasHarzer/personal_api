@@ -6,7 +6,7 @@ from typing import Optional
 from django.http import JsonResponse
 
 from api.services.kit import kit_timetable_service, kit_events_service
-from api.util import utils
+from api.util import utils, tc
 from api.util.decorators import requires, optional
 
 
@@ -51,13 +51,14 @@ def get_kit_timetable_public(request, url, day=None):
 
 
 @requires(permission="kit-public", query_params=["day", "time"])
-def get_kit_events(request, day: str, time: str):
+@optional(("type", tc.str_to_list), suffix="_")
+def get_kit_events(request, day: str, time: str, type_: Optional[list[str]] = None):
     """Returns the events for the current day"""
 
     events = []
 
     try:
-        events = kit_events_service.get_events(day, time)
+        events = kit_events_service.get_events(day, time, type_)
     except Exception as e:
         traceback.print_exc()
         # ignored
