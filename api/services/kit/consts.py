@@ -26,12 +26,14 @@ BASE_DIR = settings.BASE_DIR
 CACHE_DIR = os.path.join(BASE_DIR, "cache")
 CACHE_DIR_TIMETABLE = os.path.join(CACHE_DIR, "timetable")
 CACHE_DIR_EVENTS = os.path.join(CACHE_DIR, "events")
+CACHE_DIR_ROOMS = os.path.join(CACHE_DIR, "rooms")
 
 if not os.path.exists(CACHE_DIR_TIMETABLE):
     os.makedirs(CACHE_DIR_TIMETABLE, exist_ok=True)
 if not os.path.exists(CACHE_DIR_EVENTS):
     os.makedirs(CACHE_DIR_EVENTS, exist_ok=True)
-
+if not os.path.exists(CACHE_DIR_ROOMS):
+    os.makedirs(CACHE_DIR_ROOMS, exist_ok=True)
 
 KIT_EXTENDED_SEARCH_HEADERS = {'authority': 'campus.kit.edu', 'method': 'POST',
                                'path': '/sp/campus/all/extendedSearch.asp', 'scheme': 'https',
@@ -50,3 +52,6 @@ KIT_EXTENDED_SEARCH_HEADERS = {'authority': 'campus.kit.edu', 'method': 'POST',
                                'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64;x64) AppleWebKit / 537.36(KHTML, like Gecko) Chrome / 107.0.0.0 Safari / 537.36'}
 KIT_EVENT_ID_REGEX = re.compile("^0x\w*", re.IGNORECASE)
 KIT_BUILDING_NUMBER_REGEX = r"(^| )(\d\d\.\d\d)"
+KIT_ROOM_GGUID_REGEX = r"gguid=(0x\w*)"
+GOOGLE_MAPS_URL_REGEX = r"https:\/\/maps\.google\.com\/\?q=\d*\.?\d*,\d\.?\d*"
+

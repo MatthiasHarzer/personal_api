@@ -24,6 +24,12 @@ class WebsocketClients(models.Model):
     scopes = models.JSONField(null=True, default=list)
 
 
+class KITRoomAddressCache(models.Model):
+    building_id = models.CharField(max_length=200, primary_key=True)
+    # address = models.CharField(max_length=200)
+    google_maps_link = models.CharField(max_length=200)
+
+
 class ImageTag(models.Model):
     id = models.CharField(max_length=200, primary_key=True)
     title = models.CharField(max_length=200)
