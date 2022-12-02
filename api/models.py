@@ -30,6 +30,11 @@ class KITRoomAddressCache(models.Model):
     google_maps_link = models.CharField(max_length=200)
 
 
+class URLShortener(models.Model):
+    short_id = models.CharField(max_length=200, primary_key=True)
+    url = models.CharField(max_length=20000)
+
+
 class ImageTag(models.Model):
     id = models.CharField(max_length=200, primary_key=True)
     title = models.CharField(max_length=200)
