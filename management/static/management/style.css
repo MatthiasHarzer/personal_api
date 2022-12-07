@@ -3,11 +3,12 @@
 }
 
 :root {
+
     --topnav-backgoundcolor: #333;
     --topnav-activecolor: #4CAF50;
 }
 
-.header {
+.header     {
     color: hsl(0, 0%, 21%);
     display: inline-block;
     font-weight: bold;
@@ -78,6 +79,8 @@
 
     align-items: center;
     justify-content: center;
+
+    font-family: Calibri, sans-serif;
 
     color: white !important;
     text-align: center;

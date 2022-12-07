@@ -1,0 +1,85 @@
+{% extends "management/base.html" %}
+{% load static %}
+{% block content %}
+    <h1 class="header">Manage Short URLs</h1>
+    <a href="/manage/short_url/new" class="btn btn-primary" id="new">New</a>
+    <table>
+        <tr>
+            <th class="original_url">Original</th>
+            <th>Short URL</th>
+            <th>Action</th>
+        </tr>
+        {% for short_url in short_urls %}
+            <tr>
+                <td class="original_url">{{ short_url.url }}</td>
+                <td class="short_url">{{ base_url }}{{ short_url.short_id }} <a href="{{ base_url }}{{ short_url.short_id }}">link</a></td>
+                <td>
+                    <div class="action">
+                        <a href="/manage/short_url/edit/{{ short_url.short_id }}">Edit</a>
+{#                        <form action="/manage/keys/delete/{{ key.value }}/" method="POST">#}
+{#                            {% csrf_token %}#}
+{#                            <a href="#" class="del">#}
+{#                                <span class="del_txt">Delete</span>#}
+{#                                <input hidden#}
+{#                                       class="conf_del"#}
+{#                                       type="submit"#}
+{#                                       value="Confirm delete"></a>#}
+{##}
+{#                        </form>#}
+                    </div>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+<style>
+    a#new.btn-primary {
+        position: absolute;
+        right: 0;
+        top: 0;
+        float: right;
+        color: white;
+        background-color: #4CAF50;
+        border: none;
+        padding: 5px 15px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 10px;
+        cursor: pointer;
+        border-radius: 5px;
+    }
+
+    table{
+        position: relative;
+        width: 90% !important;
+        overflow: hidden;
+        display: block;
+    }
+    table tbody{
+        display: block;
+        width: 100%;
+        overflow: auto;
+    }
+
+
+    table tr{
+        width: 100%;
+    }
+    table td, table th {
+        padding: 4px 10px;
+
+        {#max-width: 0;#}
+
+        overflow-wrap: break-word;
+    }
+    table tr td.original_url{
+        position: relative;
+        max-width: 40vw;
+    }
+    table tr td.short_url a{
+        margin-left: auto;
+    }
+</style>
+{% endblock %}
+

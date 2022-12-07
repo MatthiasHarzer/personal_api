@@ -1,15 +1,13 @@
-from django.shortcuts import render
-
 import random
 import string
 
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render
 
+from api.models import *
 from api.services import url_shortener
 from api.util.decorators import requires
 from .forms import *
-from api.models import *
 
 
 # Create your views here.
@@ -175,6 +173,23 @@ def create_or_edit_store_item(request, item_key=None):
     context["site"] = "store_new"
 
     return render(request, "management/store.html", context)
+
+
+def short_url_overview(request):
+    if not request.user.is_superuser:  # Only su
+        return HttpResponse("Insufficient permission")
+    try:
+        base_url = StoreItem.objects.get(name="url_shortener_base_url").value
+    except StoreItem.DoesNotExist:
+        base_url = "https://s.taptwice.dev/"
+
+    context = {
+        "base_url": base_url,
+        "site": "short_url",
+        "short_urls": [su for su in URLShortener.objects.all()]
+    }
+
+    return render(request, "management/short_url_manager.html", context)
 
 
 def create_or_edit_short_url(request, short_id=None):

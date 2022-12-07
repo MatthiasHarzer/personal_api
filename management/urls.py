@@ -11,6 +11,7 @@ urlpatterns = \
         path("keys/new", views.create_or_edit_key, name="New key"),
         path("keys/edit/<slug:key>/", views.create_or_edit_key, name="Edit key"),
         path("keys/delete/<slug:key>/", views.delete_key, name="delete key"),
+        path("short_url/overview", views.short_url_overview, name="short_url_overview"),
         path("short_url/new", views.create_or_edit_short_url, name="New short url"),
         path("short_url/edit/<slug:short_id>/", views.create_or_edit_short_url,
              name="Edit short url"),
