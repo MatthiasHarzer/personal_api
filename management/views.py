@@ -204,7 +204,8 @@ def create_or_edit_short_url(request, short_id=None):
         if not form.is_valid():
             return HttpResponse("Invalid form")
 
-        short_id = form.cleaned_data.get("short_id")
+        if short_id is None:
+            short_id = form.cleaned_data.get("short_id")
         if len(short_id) <= 0:
             short_id = None
         url = form.cleaned_data.get("url")
