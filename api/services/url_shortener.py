@@ -23,6 +23,8 @@ def create_or_edit(url: str, short_id: Optional[str] = None):
 
 def resolve(short_id: str):
     """Resolves a short link id to the original url"""
+    if not short_id:
+        return None
 
     try:
         short = URLShortener.objects.get(short_id=short_id)

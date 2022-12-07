@@ -6,6 +6,7 @@ import string
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.shortcuts import render
 
+from api.services import url_shortener
 from api.util.decorators import requires
 from .forms import *
 from api.models import *
@@ -176,6 +177,35 @@ def create_or_edit_store_item(request, item_key=None):
     return render(request, "management/store.html", context)
 
 
+def create_or_edit_short_url(request, short_id=None):
+    if not request.user.is_superuser:  # Only su can create new permission/key/etc...
+        return HttpResponse("Insufficient permission")
+
+    context = {}
+    url = url_shortener.resolve(short_id)
+
+    if request.method == "POST":
+        form = UrlShortenerForm(request.POST)
+        if not form.is_valid():
+            return HttpResponse("Invalid form")
+
+        short_id = form.cleaned_data.get("short_id")
+        if len(short_id) <= 0:
+            short_id = None
+        url = form.cleaned_data.get("url")
+        short_id = url_shortener.create_or_edit(url, short_id)
+
+    edit = short_id is not None
+    form = UrlShortenerForm(short_id=short_id, url=url, edit=edit)
+
+    context["form"] = form
+    context["edit"] = edit
+    context["short_id"] = short_id
+    context["site"] = "short_url"
+
+    return render(request, "management/short_url.html", context)
+
+
 @requires(superuser=True)
 def upload_or_edit_image(request):
     """
@@ -188,7 +218,6 @@ def upload_or_edit_image(request):
         if not form.is_valid():
             return HttpResponseBadRequest("Invalid form")
 
-        
         image = form.cleaned_data.get("image")
         name = form.cleaned_data.get("name")
         tags = form.cleaned_data.get("tags")

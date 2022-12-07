@@ -38,6 +38,25 @@ class ApiKeyForm(ModelForm):
                                                   attrs={'autocomplete': 'off'}))
 
 
+class UrlShortenerForm(forms.Form):
+    # url = forms.CharField(max_length=20000, label="URL",
+    #                       widget=forms.TextInput(attrs={'autocomplete': 'off'}))
+    # short_id = forms.CharField(max_length=200, label="Short ID",
+    #                            widget=forms.TextInput(attrs={'autocomplete': 'off'}))
+
+    def __init__(self, *args, **kwargs):
+        short_id = kwargs.pop('short_id', '')
+        url = kwargs.pop('url', '')
+        edit = kwargs.pop('edit', '')
+        super(UrlShortenerForm, self).__init__(*args, **kwargs)
+        self.fields["short_id"] = forms.CharField(max_length=200, initial=short_id, required=False, disabled=edit,
+                                                  widget=forms.TextInput(
+                                                      attrs={'autocomplete': 'off'}))
+        self.fields["url"] = forms.CharField(max_length=20000, initial=url,
+                                             widget=forms.TextInput(
+                                                 attrs={'autocomplete': 'off'}))
+
+
 class StoreItemForm(forms.Form):
 
     def __init__(self, name, value, confidential, *args, **kwargs):
@@ -53,4 +72,3 @@ class UploadOrEditImageForm(ModelForm):
     class Meta:
         model = Image
         fields = ('title', 'image', 'tags')
-

@@ -1,0 +1,19 @@
+{% extends "management/base.html" %}
+{% load static %}
+{% block content %}
+
+    {% if edit %}
+        <h1 class="header">Edit {{ short_id }}</h1>
+        <form action="/manage/short_url/edit/{{ short_id }}/" method="POST">
+    {% else %}
+        <h1 class="header">New Short URL</h1>
+        <form action="/manage/short_url/new" method="POST">
+    {% endif %}
+
+{{ form.as_ul }}
+{% csrf_token %}
+<br>
+
+<input type="submit" value="Submit">
+</form>
+{% endblock %}
