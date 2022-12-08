@@ -16,16 +16,14 @@
                 <td>
                     <div class="action">
                         <a href="/manage/short_url/edit/{{ short_url.short_id }}">Edit</a>
-{#                        <form action="/manage/keys/delete/{{ key.value }}/" method="POST">#}
-{#                            {% csrf_token %}#}
-{#                            <a href="#" class="del">#}
-{#                                <span class="del_txt">Delete</span>#}
-{#                                <input hidden#}
-{#                                       class="conf_del"#}
-{#                                       type="submit"#}
-{#                                       value="Confirm delete"></a>#}
-{##}
-{#                        </form>#}
+                        <form action="/manage/short_url/delete/{{ short_url.short_id }}/" method="POST">
+                            {% csrf_token %}
+                            <a href="#" class="del">
+                                <input class="conf_del"
+                                       type="submit"
+                                       value="Delete"></a>
+
+                        </form>
                     </div>
                 </td>
             </tr>

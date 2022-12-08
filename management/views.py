@@ -192,6 +192,16 @@ def short_url_overview(request):
     return render(request, "management/short_url_manager.html", context)
 
 
+def delete_short_url(request, short_url):
+    if not request.user.is_superuser:  # Only
+        return HttpResponse("Insufficient permission")
+
+    try:
+        URLShortener.objects.get(short_url=short_url).delete()
+    except (KeyError, URLShortener.DoesNotExist):
+        pass
+
+
 def create_or_edit_short_url(request, short_id=None):
     if not request.user.is_superuser:  # Only su can create new permission/key/etc...
         return HttpResponse("Insufficient permission")
