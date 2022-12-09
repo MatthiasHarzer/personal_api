@@ -12,16 +12,19 @@
         {% for short_url in short_urls %}
             <tr>
                 <td class="original_url">{{ short_url.url }}</td>
-                <td class="short_url">{{ base_url }}{{ short_url.short_id }} <a href="{{ base_url }}{{ short_url.short_id }}">link</a></td>
+                <td class="short_url">{{ base_url }}{{ short_url.short_id }} <a
+                        href="{{ base_url }}{{ short_url.short_id }}">link</a></td>
                 <td>
                     <div class="action">
                         <a href="/manage/short_url/edit/{{ short_url.short_id }}">Edit</a>
                         <form action="/manage/short_url/delete/{{ short_url.short_id }}/" method="POST">
                             {% csrf_token %}
                             <a href="#" class="del">
-                                <input class="conf_del"
+                                <span class="del_txt">Delete</span>
+                                <input hidden
+                                       class="conf_del"
                                        type="submit"
-                                       value="Delete"></a>
+                                       value="Confirm"></a>
 
                         </form>
                     </div>
@@ -29,55 +32,80 @@
             </tr>
         {% endfor %}
     </table>
-<style>
-    a#new.btn-primary {
-        position: absolute;
-        right: 0;
-        top: 0;
-        float: right;
-        color: white;
-        background-color: #4CAF50;
-        border: none;
-        padding: 5px 15px;
-        text-align: center;
-        text-decoration: none;
-        display: inline-block;
-        font-size: 16px;
-        margin: 10px;
-        cursor: pointer;
-        border-radius: 5px;
-    }
+    <style>
+        a#new.btn-primary {
+            position: absolute;
+            right: 0;
+            top: 0;
+            float: right;
+            color: white;
+            background-color: #4CAF50;
+            border: none;
+            padding: 5px 15px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
 
-    table{
-        position: relative;
-        width: 90% !important;
-        overflow: hidden;
-        display: block;
-    }
-    table tbody{
-        display: block;
-        width: 100%;
-        overflow: auto;
-    }
+        table {
+            position: relative;
+            width: 90% !important;
+            overflow: hidden;
+            display: block;
+        }
+
+        table tbody {
+            display: block;
+            width: 100%;
+            overflow: auto;
+        }
 
 
-    table tr{
-        width: 100%;
-    }
-    table td, table th {
-        padding: 4px 10px;
+        table tr {
+            width: 100%;
+        }
 
-        {#max-width: 0;#}
+        table td, table th {
+            padding: 4px 10px;
 
-        overflow-wrap: break-word;
-    }
-    table tr td.original_url{
-        position: relative;
-        max-width: 40vw;
-    }
-    table tr td.short_url a{
-        margin-left: auto;
-    }
-</style>
+        {#max-width: 0;#} overflow-wrap: break-word;
+        }
+
+        table tr td.original_url {
+            position: relative;
+            max-width: 40vw;
+        }
+
+        table tr td.short_url a {
+            margin-left: auto;
+        }
+
+        div.action{
+            display: flex;
+            flex-flow: row;
+            justify-content: space-between;
+        }
+        div.action a{
+            margin-right: 10px;
+        }
+    </style>
+    <script>
+        const dels = document.getElementsByClassName("del");
+        {#console.log(dels)#}
+
+        for (let elmt of dels) {
+            elmt.onclick = () => {
+                {#console.log("CLICK", elmt)#}
+                const txt = elmt.getElementsByClassName("del_txt")[0];
+                const input = elmt.getElementsByClassName("conf_del")[0];
+                txt.hidden = true;
+                input.hidden = false;
+            }
+        }
+    </script>
 {% endblock %}
 
