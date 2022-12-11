@@ -1,0 +1,79 @@
+{% extends "management/base.html" %}
+{% load static %}
+{% block content %}
+    <h1 class="header">Request Catcher</h1>
+
+    <ul>
+        {% for catch in catches %}
+            <li>
+            <div class="item">
+
+                <span>{{ catch.id }}</span><span>({{ catch.length }} requests)</span>
+                <div class="action">
+
+                    <a href="/catch/{{ catch.id }}/view" target="_blank">VIEW</a>
+                    <form action="/manage/request_catcher/delete/{{ catch.id }}/" method="POST">
+                        {% csrf_token %}
+                        <a href="#" class="del">
+                            <span class="del_txt">Delete</span>
+                            <input hidden
+                                   class="conf_del"
+                                   type="submit"
+                                   value="Confirm">
+                        </a>
+
+                    </form>
+            </div>
+                </div>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <style>
+    ul{
+        padding: 0;
+    }
+        li{
+            justify-content: space-between;
+            margin: 10px 0;
+        }
+        .item{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        li span{
+            display: inline-block;
+            width: 100px;
+        }
+
+        .action{
+            display: flex;
+            justify-content: space-between;
+            {#width: 200px;#}
+        }
+        .action > *{
+            margin: 5px;
+        }
+
+        .hidden{
+            display: none;
+        }
+    </style>
+    <script>
+        const dels = document.getElementsByClassName("del");
+        {#console.log(dels)#}
+
+        for (let elmt of dels) {
+            elmt.onclick = () => {
+                {#console.log("CLICK", elmt)#}
+                const txt = elmt.getElementsByClassName("del_txt")[0];
+                const input = elmt.getElementsByClassName("conf_del")[0];
+                txt.hidden = true;
+                txt.classList.add("hidden");
+                input.hidden = false;
+            }
+        }
+    </script>
+{% endblock %}
+

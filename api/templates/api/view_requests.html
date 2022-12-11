@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Request to {{ request_id }}</title>
+</head>
+<body>
+
+    <ul>
+        {% for catch in catches %}
+            <li>
+                <h2>{{ catch.request_method }} - {{ catch.timestamp }}</h2>
+                <h3>From {{ catch.ip_address }}</h3>
+                <p>{{ catch.request_headers }}</p>
+                <p>{{ catch.request_body }}</p>
+                <p>{{ catch.content_type }}</p>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

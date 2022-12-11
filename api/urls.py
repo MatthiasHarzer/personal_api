@@ -15,5 +15,6 @@ urlpatterns = \
         path("wgit/", include("api.modules.wgit.urls"), name="wgit"),
         path("images/", include("api.modules.images.urls"), name="images"),
         path("shortener/", include("api.modules.url_shortener.urls"), name="shortener"),
+        path("catch/", include("api.modules.request_catcher.urls"), name="catcher"),
         path("test/wsupdatetest", base_views.ws_update_tester),
     ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
