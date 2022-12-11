@@ -21,6 +21,8 @@ urlpatterns = \
              name="store item edit"),
         path("store/delete/<slug:item_key>/", views.delete_store_item,
              name="store item delete"),
+        path("request_catcher", views.request_catcher_overview, name="request_catcher_overview"),
+        path("request_catcher/delete/<slug:request_id>/", views.delete_request, name="request_catcher_overview"),
         path("overview", views.get_overview, name="all keys"),
         # path("ws/getport", api_views.get_ws_port),
     ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

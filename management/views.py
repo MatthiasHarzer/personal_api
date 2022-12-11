@@ -272,6 +272,47 @@ def delete_store_item(request, item_key):
     return HttpResponseRedirect("/manage/overview")
 
 
+@requires(superuser=True)
+def request_catcher_overview(request):
+    """
+    Overview of all requests
+    """
+
+    try:
+        distinct_ids: [] = RequestCatcherItem.objects.order_by().values("request_id").distinct()
+    except RequestCatcherItem.DoesNotExist:
+        distinct_ids = []
+
+    catches = []
+
+    for id_ in distinct_ids:
+        length = RequestCatcherItem.objects.filter(request_id=id_["request_id"]).count()
+        catches.append({
+            "id": id_["request_id"],
+            "length": length,
+        })
+
+    context = {
+        "site": "request_catcher",
+        "catches": catches
+    }
+    return render(request, "management/request_catcher_overview.html", context)
+
+
+@requires(superuser=True)
+def delete_request(request, request_id):
+    """Delete a request by id"""
+
+    try:
+        catches = RequestCatcherItem.objects.filter(request_id=request_id)
+    except RequestCatcherItem.DoesNotExist:
+        pass
+
+    catches.delete()
+
+    return HttpResponseRedirect("/manage/request_catcher")
+
+
 def random_string(string_length=10):
     letters = string.ascii_letters
     return ''.join(random.choice(letters) for _ in range(string_length))

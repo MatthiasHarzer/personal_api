@@ -35,6 +35,27 @@ class URLShortener(models.Model):
     url = models.CharField(max_length=20000)
 
 
+class RequestCatcherItem(models.Model):
+    request_id = models.CharField(max_length=200)
+    ip_address = models.CharField(max_length=200, default="")
+    timestamp = models.DateTimeField(auto_now_add=True)
+    content_type = models.CharField(max_length=200)
+    request_method = models.CharField(max_length=200)
+    request_headers = models.TextField()
+    request_body = models.TextField()
+
+    def as_json(self):
+        return {
+            "request_id": self.request_id,
+            "ip_address": self.ip_address,
+            "timestamp": self.timestamp,
+            "content_type": self.content_type,
+            "request_method": self.request_method,
+            "request_headers": self.request_headers,
+            "request_body": self.request_body
+        }
+
+
 class ImageTag(models.Model):
     id = models.CharField(max_length=200, primary_key=True)
     title = models.CharField(max_length=200)
