@@ -42,6 +42,7 @@ class RequestCatcherItem(models.Model):
     content_type = models.CharField(max_length=200)
     request_method = models.CharField(max_length=200)
     request_headers = models.TextField()
+    raw_request_headers = models.TextField()
     request_body = models.TextField()
 
     def as_json(self):
@@ -52,6 +53,7 @@ class RequestCatcherItem(models.Model):
             "content_type": self.content_type,
             "request_method": self.request_method,
             "request_headers": self.request_headers,
+            "raw_request_headers": self.raw_request_headers,
             "request_body": self.request_body
         }
 
