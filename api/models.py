@@ -44,6 +44,7 @@ class RequestCatcherItem(models.Model):
     request_headers = models.TextField()
     raw_request_headers = models.TextField()
     request_body = models.TextField()
+    request_get = models.TextField()
 
     def as_json(self):
         return {
@@ -54,7 +55,8 @@ class RequestCatcherItem(models.Model):
             "request_method": self.request_method,
             "request_headers": self.request_headers,
             "raw_request_headers": self.raw_request_headers,
-            "request_body": self.request_body
+            "request_body": self.request_body,
+            "request_get": self.request_get,
         }
 
 

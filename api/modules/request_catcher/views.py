@@ -21,6 +21,7 @@ def catch_request(request, request_id):
         raw_request_headers={k: v for k, v in request.headers.items()},
         request_body=request.body.decode("utf-8"),
         content_type=request.content_type,
+        request_get={k: v for k, v in request.GET.items()},
     )
     catch.save()
 

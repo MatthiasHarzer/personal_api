@@ -11,6 +11,7 @@
             <li>
                 <h2>{{ catch.request_method }} - {{ catch.timestamp }}</h2>
                 <h3>From {{ catch.ip_address }}</h3>
+                <p>{{ catch.request_get }}</p>
                 <p>{{ catch.raw_request_headers }}</p>
                 <p>{{ catch.request_body }}</p>
                 <p>{{ catch.content_type }}</p>
