@@ -11,9 +11,16 @@
         </tr>
         {% for short_url in short_urls %}
             <tr>
-                <td class="original_url">{{ short_url.url }}</td>
-                <td class="short_url">{{ base_url }}{{ short_url.short_id }} <a
-                        href="{{ base_url }}{{ short_url.short_id }}">link</a></td>
+                <td class="original_url">
+                    {{ short_url.url }}
+                </td>
+                <td class="short_url">
+                    <a class="short-url-repr" href="#" data-url="{{ base_url }}{{ short_url.short_id }}">
+                        {{ base_url }}{{ short_url.short_id }}
+                    </a>
+
+                     <a
+                        href="{{ base_url }}{{ short_url.short_id }}" target="_blank">link</a></td>
                 <td>
                     <div class="action">
                         <a href="/manage/short_url/edit/{{ short_url.short_id }}">Edit</a>
@@ -92,6 +99,18 @@
         div.action a{
             margin-right: 10px;
         }
+
+        a.short-url-repr{
+            cursor: pointer;
+            text-decoration: none;
+            color: #447a45;
+            margin-right: 5px;
+        }
+        a.short-url-repr:hover{
+            text-decoration: underline;
+        }
+
+
     </style>
     <script>
         const dels = document.getElementsByClassName("del");
@@ -106,6 +125,18 @@
                 input.hidden = false;
             }
         }
+
+        document.querySelectorAll(".short-url-repr").forEach(elmt => {
+            elmt.onclick = () => {
+                const url = elmt.dataset.url;
+
+                navigator.clipboard.writeText(url).then(() => {
+                    alert("Copied to clipboard");
+                }, () => {
+                    alert("Failed to copy to clipboard");
+                });
+            }
+        })
     </script>
 {% endblock %}
 
