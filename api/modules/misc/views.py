@@ -1,4 +1,5 @@
 import datetime
+import os
 import time
 from threading import Thread
 
@@ -140,3 +141,27 @@ def get_price_from_steam_market(request, url, filter=None):
         return JsonResponse(prices)
     except ValueError:
         return JsonResponse({"error": "Invalid URL"})
+
+
+@requires(permission="dir-viewer")
+def get_dir_viewer(request):
+    store_base_url = db_utils.get_store_item("static_base_url")
+    store_static_base_dir = db_utils.get_store_item("static_base_dir")
+    store_dir_viewer_dir = db_utils.get_store_item("dir_viewer_dir")
+    base_url = store_base_url if store_base_url else "https://static.taptwice.dev"
+    dir_viewer_dir = store_dir_viewer_dir if store_dir_viewer_dir else "/var/www/static"
+    static_base_dir = store_static_base_dir if store_static_base_dir else "/var/www/static"
+
+    rel_static_base_dir = store_dir_viewer_dir.replace(static_base_dir, "")
+
+    images: list[str] = []
+
+    for root, dirs, files in os.walk(dir_viewer_dir):
+        for file in files:
+            if file.lower().split(".")[-1] in ["png", "jpg", "jpeg", "gif", "webp"]:
+                path = os.path.join(root, file).replace(dir_viewer_dir, base_url + rel_static_base_dir).replace("\\", "/")
+                images.append(path)
+
+    return JsonResponse({"images": images})
+
+

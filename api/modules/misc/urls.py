@@ -10,4 +10,5 @@ urlpatterns = \
         path("services/self/restart", views.restart_self),
         path("steammarket/itemprice", views.get_price_from_steam_market),
         path("telegrambot/sendMessage", views.send_telegram_message_to_me),
+        path("dir-viewer/get", views.get_dir_viewer),
     ]
