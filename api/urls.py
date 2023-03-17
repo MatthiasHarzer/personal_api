@@ -17,4 +17,5 @@ urlpatterns = \
         path("shortener/", include("api.modules.url_shortener.urls"), name="shortener"),
         path("catch/", include("api.modules.request_catcher.urls"), name="catcher"),
         path("test/wsupdatetest", base_views.ws_update_tester),
+        path("bfp/", include("api.modules.bfp.urls"), name="bfp"),
     ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
