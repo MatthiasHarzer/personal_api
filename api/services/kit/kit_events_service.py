@@ -14,7 +14,7 @@ from api.services.kit.consts import CLASS_TIMES_AS_STRINGS_DICT, KIT_EXTENDED_SE
     CACHE_DIR_EVENTS, CACHE_DIR_ROOMS
 
 BASE_URL = "https://campus.kit.edu/sp/campus/all/extendedSearch.asp"
-RAW_FORM_DATA = "search=Suchen&tguid=0xB7532209C5264C53A99D9128A9F9A321&eventcoursenumber=&eventtitle=&eventtype=Vorlesung+%28V%29&eventformat=&eventlanguage=&appointmentperiod=&appointmentweekday=&appointmentdate=11.11.2022&appointmenttimestart=14%3A00&appointmenttimeend=15%3A30&product=%7B%7D&module=%7B%7D&brick=%7B%7D&audience=%7B%7D&field=%7B%7D&unit=%7B%7D&room=%7B%7D&lect=%7B%7D"
+RAW_FORM_DATA = "search=Suchen&tguid=0x40B784B43AED4CC9857335104533EDFB&eventcoursenumber=&eventtitle=&eventtype=Vorlesung+%28V%29&eventformat=&eventlanguage=&appointmentperiod=&appointmentweekday=&appointmentdate=11.11.2022&appointmenttimestart=14%3A00&appointmenttimeend=15%3A30&product=%7B%7D&module=%7B%7D&brick=%7B%7D&audience=%7B%7D&field=%7B%7D&unit=%7B%7D&room=%7B%7D&lect=%7B%7D"
 PARSED_FORM_DATA = {
     k: v for k, v in [x.split("=") for x in RAW_FORM_DATA.split("&")]
 }
